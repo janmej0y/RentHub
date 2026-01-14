@@ -1,3 +1,82 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "room-1",
+      "description": "Modern apartment living room",
+      "imageUrl": "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxsaXZpbmclMjByb29tfGVufDB8fHx8MTc2ODM5MTI2Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "living room"
+    },
+    {
+      "id": "room-2",
+      "description": "Cozy bedroom with a large window",
+      "imageUrl": "https://images.unsplash.com/photo-1540518614846-7eded433c457?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxiZWRyb29tfGVufDB8fHx8MTc2ODQxNDM3OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bedroom"
+    },
+    {
+      "id": "room-3",
+      "description": "Spacious studio with wooden floors",
+      "imageUrl": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8YXBhcnRtZW50JTIwaW50ZXJpb3J8ZW58MHx8fHwxNzY4NDE0Mzc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "apartment interior"
+    },
+    {
+      "id": "room-4",
+      "description": "Bright and airy kitchen space",
+      "imageUrl": "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxraXRjaGVufGVufDB8fHx8MTc2ODQxNDM3OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "kitchen"
+    },
+    {
+      "id": "room-5",
+      "description": "Minimalist bedroom design",
+      "imageUrl": "https://images.unsplash.com/photo-1552558636-f6a8f071c2b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWluaW1hbGlzdCUyMGJlZHJvb218ZW58MHx8fHwxNzY4MzIyMjc1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "minimalist bedroom"
+    },
+    {
+      "id": "room-6",
+      "description": "Stylish living area with a sofa",
+      "imageUrl": "https://images.unsplash.com/photo-1757439402190-99b73ac8e807?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c3R5bGlzaCUyMGFwYXJ0bWVudHxlbnwwfHx8fDE3Njg0MTU1MDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "stylish apartment"
+    },
+    {
+      "id": "room-7",
+      "description": "A well-lit study nook",
+      "imageUrl": "https://images.unsplash.com/photo-1548048026-5a1a941d93d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxzdHVkeSUyMGFyZWF8ZW58MHx8fHwxNzY4NDE1NTA0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "study area"
+    },
+    {
+      "id": "room-8",
+      "description": "Room with a balcony view",
+      "imageUrl": "https://images.unsplash.com/photo-1702830499141-a0634d87d6af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxiYWxjb255JTIwdmlld3xlbnwwfHx8fDE3NjgzNTQ1NjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "balcony view"
+    },
+    {
+      "id": "room-9",
+      "description": "Shared living space in a hostel",
+      "imageUrl": "https://images.unsplash.com/photo-1646236731457-18f0c8a6d188?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxob3N0ZWwlMjByb29tfGVufDB8fHx8MTc2ODQwNTE2M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "hostel room"
+    },
+    {
+      "id": "room-10",
+      "description": "Luxurious penthouse apartment",
+      "imageUrl": "https://images.unsplash.com/photo-1671712040394-c963de1f6de1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwZW50aG91c2UlMjBhcGFydG1lbnR8ZW58MHx8fHwxNzY4NDE1NTA1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "penthouse apartment"
+    },
+    {
+      "id": "room-11",
+      "description": "Compact and efficient room layout",
+      "imageUrl": "https://images.unsplash.com/photo-1765464184843-105e144bd54b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxzbWFsbCUyMHJvb218ZW58MHx8fHwxNzY4NDE1NTA0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "small room"
+    },
+    {
+      "id": "room-12",
+      "description": "Family-friendly living room",
+      "imageUrl": "https://images.unsplash.com/photo-1704040686428-7534b262d0d8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmYW1pbHklMjByb29tfGVufDB8fHx8MTc2ODQxNTUwNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "family room"
+    },
+    {
+      "id": "user-avatar-1",
+      "description": "User avatar",
+      "imageUrl": "https://images.unsplash.com/photo-1499952127939-9bbf5af6c51c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxwZXJzb258ZW58MHx8fHwxNzY4NDA3MjAzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person"
+    }
+  ]
 }
