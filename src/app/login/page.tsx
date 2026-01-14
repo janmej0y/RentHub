@@ -10,20 +10,24 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function LoginPage() {
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!isLoading && isAuthenticated) {
       router.push('/');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isLoading, router]);
   
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real app, you would validate credentials here
     login();
   };
+
+  if (isLoading || isAuthenticated) {
+    return null; // Or a loading spinner
+  }
 
   return (
     <div className="flex min-h-full flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8">

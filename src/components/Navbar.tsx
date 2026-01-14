@@ -5,9 +5,10 @@ import { Button } from './ui/button';
 import { UserNav } from './auth/UserNav';
 import { useAuth } from '@/hooks/useAuth';
 import { Home } from 'lucide-react';
+import { Skeleton } from './ui/skeleton';
 
 export function Navbar() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -43,7 +44,12 @@ export function Navbar() {
           </nav>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
-          {isAuthenticated ? (
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-8 w-20" />
+              <Skeleton className="h-8 w-20" />
+            </div>
+          ) : isAuthenticated ? (
             <UserNav />
           ) : (
             <>

@@ -24,24 +24,21 @@ import {
 import { useToast } from '@/hooks/use-toast';
 
 export default function MyRoomsPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated === false) {
+    if (!isAuthLoading && !isAuthenticated) {
       router.push('/login');
-    } else if (isAuthenticated === true) {
-      setIsVerified(true);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isAuthLoading, router]);
 
   useEffect(() => {
-    if (isVerified && user) {
+    if (isAuthenticated && user) {
       const fetchOwnerRooms = async () => {
         setIsLoading(true);
         const ownerRooms = await getRoomsByOwner(user.id);
@@ -50,7 +47,7 @@ export default function MyRoomsPage() {
       };
       fetchOwnerRooms();
     }
-  }, [isVerified, user]);
+  }, [isAuthenticated, user]);
   
   const handleDelete = async (roomId: string) => {
     try {
@@ -69,7 +66,7 @@ export default function MyRoomsPage() {
     }
   };
 
-  if (!isVerified) {
+  if (isAuthLoading || !isAuthenticated) {
     return (
        <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">

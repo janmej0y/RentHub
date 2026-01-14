@@ -3,25 +3,20 @@
 import { AddRoomForm } from '@/components/AddRoomForm';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AddRoomPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
-    // This is a simple client-side auth check.
-    // In a real app, this would be handled by middleware.
-    if (isAuthenticated === false) {
+    if (!isLoading && !isAuthenticated) {
       router.push('/login');
-    } else if (isAuthenticated === true) {
-      setIsVerified(true);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isLoading, router]);
 
-  if (!isVerified) {
+  if (isLoading || !isAuthenticated) {
     return (
       <div className="container mx-auto max-w-2xl px-4 py-12">
         <Skeleton className="mb-8 h-10 w-1/3" />

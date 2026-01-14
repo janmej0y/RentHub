@@ -1,9 +1,9 @@
 export type PropertyType = '1 BHK' | '2 BHK' | '1 Bed' | '2 Bed' | '3 Bed';
-export const PropertyTypes: PropertyType[] = ['1 BHK', '2 BHK', '1 Bed', '2 Bed', '3 Bed'];
+export const PropertyTypes: readonly PropertyType[] = ['1 BHK', '2 BHK', '1 Bed', '2 Bed', '3 Bed'];
 
 
 export type TenantPreference = 'Bachelor' | 'Family' | 'Girls' | 'Working';
-export const TenantPreferences: TenantPreference[] = ['Bachelor', 'Family', 'Girls', 'Working'];
+export const TenantPreferences: readonly TenantPreference[] = ['Bachelor', 'Family', 'Girls', 'Working'];
 
 
 export interface Room {
@@ -17,4 +17,5 @@ export interface Room {
   ownerId: string;
   images: { url: string; id: string }[];
   createdAt: Date;
+  description?: string;
 }

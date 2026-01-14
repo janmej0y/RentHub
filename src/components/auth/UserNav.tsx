@@ -14,11 +14,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 import { LogOut, User as UserIcon } from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Skeleton } from '../ui/skeleton';
 
 export function UserNav() {
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const avatarPlaceholder = PlaceHolderImages.find(p => p.id === 'user-avatar-1');
 
+  if (isLoading) {
+    return <Skeleton className="h-9 w-9 rounded-full" />;
+  }
+  
   if (!user) return null;
   
   const userInitials = user.name
