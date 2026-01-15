@@ -20,9 +20,8 @@ export function RoomCard({ room }: RoomCardProps) {
           <Image
             src={room.images[0]?.url || placeholder?.imageUrl || "https://picsum.photos/seed/1/600/400"}
             alt={room.title}
-            width={600}
-            height={400}
-            className="object-cover w-full h-full"
+            fill
+            className="object-cover"
             data-ai-hint="apartment interior"
           />
         </div>
