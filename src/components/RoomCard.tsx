@@ -14,7 +14,7 @@ export function RoomCard({ room }: RoomCardProps) {
   const placeholder = PlaceHolderImages.find(p => p.id === 'room-1');
   
   return (
-    <Card className="w-full overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
+    <Card className="w-full h-full overflow-hidden transition-all duration-300 ease-in-out group-hover:shadow-xl group-hover:-translate-y-1">
       <CardHeader className="p-0">
         <div className="relative aspect-video w-full overflow-hidden bg-muted">
           <Image

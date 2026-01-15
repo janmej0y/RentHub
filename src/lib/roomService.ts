@@ -13,6 +13,7 @@ const roomsData: Room[] = [
     ownerId: 'user-2',
     images: [{ id: 'img-1', url: PlaceHolderImages.find(p => p.id === 'room-1')?.imageUrl || '' }],
     createdAt: new Date('2023-10-01'),
+    description: 'A cozy and well-lit 1BHK apartment in the heart of Koramangala. Perfect for bachelors or students. Comes with a modular kitchen and a balcony with a great view. Located in a quiet neighborhood with easy access to shops, restaurants, and public transport.'
   },
   {
     id: 'room-2',
@@ -23,8 +24,9 @@ const roomsData: Room[] = [
     tenantPreference: 'Family',
     ownerContact: '9876543211',
     ownerId: 'user-1',
-    images: [{ id: 'img-2', url: PlaceHolderImages.find(p => p.id === 'room-2')?.imageUrl || '' }],
+    images: [{ id: 'img-2', url: PlaceHolderImages.find(p => p.id === 'room-2')?.imageUrl || '' }, { id: 'img-2a', url: PlaceHolderImages.find(p => p.id === 'room-6')?.imageUrl || '' }],
     createdAt: new Date('2023-10-05'),
+    description: 'A beautiful and spacious 2-bedroom apartment in the posh locality of Bandra. Ideal for families. The apartment is semi-furnished and has a large living room, two bathrooms, and a dedicated parking spot. 24/7 security and water supply.'
   },
   {
     id: 'room-3',
@@ -37,6 +39,7 @@ const roomsData: Room[] = [
     ownerId: 'user-2',
     images: [{ id: 'img-3', url: PlaceHolderImages.find(p => p.id === 'room-3')?.imageUrl || '' }],
     createdAt: new Date('2023-10-10'),
+    description: 'A modern and secure studio apartment exclusively for girls. Located near the main IT park in Pune. The studio is fully furnished with all necessary amenities including a kitchenette, AC, and high-speed internet. The building has a female security guard and biometric access.'
   },
   {
     id: 'room-4',
@@ -49,6 +52,7 @@ const roomsData: Room[] = [
     ownerId: 'user-1',
     images: [{ id: 'img-4', url: PlaceHolderImages.find(p => p.id === 'room-4')?.imageUrl || '' }],
     createdAt: new Date('2023-10-12'),
+    description: 'Experience luxury living in this 2BHK apartment with a stunning view of the city skyline. Perfect for working professionals. The apartment is part of a premium complex with a swimming pool, gym, and clubhouse. Close to the metro station.'
   },
   {
     id: 'room-5',
@@ -61,6 +65,7 @@ const roomsData: Room[] = [
     ownerId: 'user-2',
     images: [{ id: 'img-5', url: PlaceHolderImages.find(p => p.id === 'room-5')?.imageUrl || '' }],
     createdAt: new Date('2023-10-15'),
+    description: 'A serene and peaceful 3-bedroom house located in a calm residential area of Chennai. Perfect for a family looking for a quiet place to live. The house has a private garden, ample ventilation, and is surrounded by greenery.'
   },
   {
     id: 'room-6',
@@ -73,6 +78,7 @@ const roomsData: Room[] = [
     ownerId: 'user-1',
     images: [{ id: 'img-6', url: PlaceHolderImages.find(p => p.id === 'room-6')?.imageUrl || '' }],
     createdAt: new Date('2023-10-18'),
+    description: 'A comfortable 1BHK apartment located just minutes away from Hitech City. An ideal choice for IT professionals. The building is new and has all modern amenities. The flat is well-ventilated and receives ample natural light.'
   },
   {
     id: 'room-7',
@@ -85,6 +91,7 @@ const roomsData: Room[] = [
     ownerId: 'user-2',
     images: [{ id: 'img-7', url: PlaceHolderImages.find(p => p.id === 'room-7')?.imageUrl || '' }],
     createdAt: new Date('2023-10-20'),
+    description: 'A budget-friendly room for bachelors in a prime location in Kolkata. The room is part of a shared apartment and comes with a bed, cupboard, and a study table. The kitchen and bathroom are shared. All bills included in the rent.'
   },
   {
     id: 'room-8',
@@ -97,6 +104,7 @@ const roomsData: Room[] = [
     ownerId: 'user-1',
     images: [{ id: 'img-8', url: PlaceHolderImages.find(p => p.id === 'room-8')?.imageUrl || '' }],
     createdAt: new Date('2023-10-22'),
+    description: 'A luxurious penthouse apartment with a private terrace garden. Located in a premium high-rise building in Mumbai. Offers breathtaking views of the sea. The apartment is fully furnished with designer furniture and high-end appliances.'
   },
 ];
 
@@ -121,6 +129,11 @@ export const findRooms = async (filters: RoomFilter): Promise<Room[]> => {
     return locationMatch && priceMatch && propertyTypeMatch && tenantPreferenceMatch;
   }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 };
+
+export const getRoomById = async (id: string): Promise<Room | undefined> => {
+  await simulateDelay(200);
+  return roomsData.find(room => room.id === id);
+}
 
 export const getRoomsByOwner = async (ownerId: string): Promise<Room[]> => {
     await simulateDelay(300);
