@@ -20,8 +20,7 @@ export default function RoomDetailPage({ params }: { params: { id: string } }) {
   const [showContact, setShowContact] = useState(false);
 
   useEffect(() => {
-    const { id } = params;
-    const fetchRoom = async () => {
+    const fetchRoom = async (id: string) => {
       setIsLoading(true);
       const fetchedRoom = await getRoomById(id);
       if (!fetchedRoom) {
@@ -31,10 +30,10 @@ export default function RoomDetailPage({ params }: { params: { id: string } }) {
       setIsLoading(false);
     };
 
-    if (id) {
-      fetchRoom();
+    if (params.id) {
+      fetchRoom(params.id);
     }
-  }, [params]);
+  }, [params.id]);
 
   if (isLoading) {
     return (
