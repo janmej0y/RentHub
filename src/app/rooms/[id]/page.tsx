@@ -29,7 +29,9 @@ export default function RoomDetailPage({ params }: { params: { id: string } }) {
       setIsLoading(false);
     };
 
-    fetchRoom();
+    if (params.id) {
+      fetchRoom();
+    }
   }, [params.id]);
 
   if (isLoading) {
