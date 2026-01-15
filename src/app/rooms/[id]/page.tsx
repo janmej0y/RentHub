@@ -18,11 +18,12 @@ export default function RoomDetailPage({ params }: { params: { id: string } }) {
   const [room, setRoom] = useState<Room | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showContact, setShowContact] = useState(false);
+  const { id } = params;
 
   useEffect(() => {
     const fetchRoom = async () => {
       setIsLoading(true);
-      const fetchedRoom = await getRoomById(params.id);
+      const fetchedRoom = await getRoomById(id);
       if (!fetchedRoom) {
         notFound();
       }
@@ -30,10 +31,10 @@ export default function RoomDetailPage({ params }: { params: { id: string } }) {
       setIsLoading(false);
     };
 
-    if (params.id) {
+    if (id) {
       fetchRoom();
     }
-  }, [params.id]);
+  }, [id]);
 
   if (isLoading) {
     return (
