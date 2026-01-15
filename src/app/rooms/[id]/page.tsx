@@ -33,7 +33,7 @@ export default function RoomDetailPage({ params }: { params: { id: string } }) {
     if (params.id) {
       fetchRoom(params.id);
     }
-  }, [params]);
+  }, [params.id]);
 
   if (isLoading) {
     return (
