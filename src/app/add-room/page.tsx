@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { AddRoomForm } from '@/components/AddRoomForm';
-import { useAuth } from '@/context/AuthContext';
+import { useAuthContext } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AddRoomPage() {
