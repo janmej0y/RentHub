@@ -16,12 +16,13 @@ export function RoomCard({ room }: RoomCardProps) {
   return (
     <Card className="w-full overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
       <CardHeader className="p-0">
-        <div className="aspect-video relative">
+        <div className="relative aspect-video w-full overflow-hidden bg-muted">
           <Image
             src={room.images[0]?.url || placeholder?.imageUrl || "https://picsum.photos/seed/1/600/400"}
             alt={room.title}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             data-ai-hint="apartment interior"
           />
         </div>
