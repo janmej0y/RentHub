@@ -4,14 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/context/AuthContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 
 export default function LoginPage() {
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuthContext();
   const router = useRouter();
   const [isAdminLogin, setIsAdminLogin] = useState(true);
 
@@ -24,7 +24,9 @@ export default function LoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real app, you would validate credentials here
-    login(isAdminLogin ? 'admin' : 'user');
+    const email = isAdminLogin ? 'admin@example.com' : 'user@example.com';
+    const password = 'password'; // Replace with actual password logic
+    login(email, password);
   };
 
   if (isLoading || isAuthenticated) {
@@ -37,7 +39,7 @@ export default function LoginPage() {
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="font-headline text-3xl">Welcome Back</CardTitle>
-            <CardDescription>Sign in to continue to RoomBase</CardDescription>
+            <CardDescription>Sign in to continue to RentHub</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-6">

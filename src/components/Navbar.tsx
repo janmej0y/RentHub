@@ -3,12 +3,12 @@
 import Link from 'next/link';
 import { Button } from './ui/button';
 import { UserNav } from './auth/UserNav';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/context/AuthContext';
 import { Home } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 
 export function Navbar() {
-  const { isAuthenticated, isLoading, hasRole } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuthContext();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -16,7 +16,7 @@ export function Navbar() {
         <div className="mr-4 flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Home className="h-6 w-6" />
-            <span className="font-bold sm:inline-block">RoomBase</span>
+            <span className="font-bold sm:inline-block">RentHub</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm">
             <Link
@@ -25,7 +25,7 @@ export function Navbar() {
             >
               Find a Room
             </Link>
-            {isAuthenticated && hasRole('admin') && (
+            {isAuthenticated && ('admin') && (
               <>
                 <Link
                   href="/add-room"

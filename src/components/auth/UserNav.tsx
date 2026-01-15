@@ -11,13 +11,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthContext } from '@/context/AuthContext';
 import { LogOut, User as UserIcon } from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Skeleton } from '../ui/skeleton';
 
 export function UserNav() {
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, isLoading } = useAuthContext();
   const avatarPlaceholder = PlaceHolderImages.find(p => p.id === 'user-avatar-1');
 
   if (isLoading) {

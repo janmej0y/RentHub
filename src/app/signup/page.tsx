@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { useAuthContext } from '@/context/AuthContext';
 
 export default function SignUpPage() {
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { signup, isAuthenticated, isLoading } = useAuthContext();
   const router = useRouter();
 
   useEffect(() => {
@@ -19,54 +19,60 @@ export default function SignUpPage() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // In a real app, you would create a user account here
-    // For now, we'll sign up as a regular 'user'
-    login('user');
+    const formData = new FormData(e.currentTarget);
+
+    const name = formData.get('name') as string;
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    try {
+      await signup(email, password, name);
+    } catch (err: any) {
+      alert(err.message);
+    }
   };
 
-  if (isLoading || isAuthenticated) {
-    return null; // Or a loading spinner
-  }
+  if (isLoading) return null;
 
   return (
-    <div className="flex min-h-full flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="font-headline text-3xl">Create an Account</CardTitle>
-            <CardDescription>Join RoomBase to find or list your perfect room</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSignUp} className="space-y-6">
-               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input id="name" name="name" type="text" autoComplete="name" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email address</Label>
-                <Input id="email" name="email" type="email" autoComplete="email" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" name="password" type="password" autoComplete="new-password" required />
-              </div>
-              <div>
-                <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
-                  Sign up
-                </Button>
-              </div>
-            </form>
-             <p className="mt-6 text-center text-sm text-muted-foreground">
-              Already have an account?{' '}
-              <Link href="/login" className="font-semibold leading-6 text-accent-foreground hover:underline">
-                Sign in
-              </Link>
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+    <div className="flex min-h-full items-center justify-center px-4 py-12">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-headline">Create an Account</CardTitle>
+          <CardDescription>Join RentHub to find or list your perfect room</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSignUp} className="space-y-6">
+            <div>
+              <Label htmlFor="name">Full Name</Label>
+              <Input id="name" name="name" required />
+            </div>
+
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" name="email" type="email" required />
+            </div>
+
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" name="password" type="password" required />
+            </div>
+
+            <Button type="submit" className="w-full">
+              Sign up
+            </Button>
+          </form>
+
+          <p className="mt-6 text-center text-sm">
+            Already have an account?{' '}
+            <Link href="/login" className="font-semibold hover:underline">
+              Sign in
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

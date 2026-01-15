@@ -1,89 +1,122 @@
 'use client';
 
-import type { User, UserRole } from '@/types/user';
-import { createContext, useState, ReactNode, useMemo, useEffect } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
-export interface AuthContextType {
-  user: User | null;
-  login: (role?: UserRole) => void;
-  logout: () => void;
+interface AppUser {
+  id: string;
+  email: string;
+  name: string;
+  role: 'user' | 'admin';
+}
+
+interface AuthContextType {
+  user: AppUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  hasRole: (role: UserRole) => boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, name: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
-export const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | null>(null);
 
-const adminUser: User = {
-  id: 'user-1',
-  name: 'Sam Owner',
-  email: 'sam.owner@example.com',
-  role: 'admin',
-};
-
-const regularUser: User = {
-  id: 'user-2',
-  name: 'Alex Renter',
-  email: 'alex.renter@example.com',
-  role: 'user',
-}
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  // 🔁 Restore session
   useEffect(() => {
-    // Simulate checking auth status on mount
-    const authStatus = localStorage.getItem('isAuthenticated');
-    const userRole = localStorage.getItem('userRole') as UserRole;
+    supabase.auth.getSession().then(({ data }) => {
+      const sessionUser = data.session?.user;
+      if (sessionUser) mapUser(sessionUser);
+      setIsLoading(false);
+    });
 
-    if (authStatus === 'true') {
-      if (userRole === 'admin') {
-        setUser(adminUser);
-      } else {
-        setUser(regularUser);
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session?.user) mapUser(session.user);
+        else setUser(null);
       }
-    }
-    setIsLoading(false);
+    );
+
+    return () => listener.subscription.unsubscribe();
   }, []);
 
+  const mapUser = (user: SupabaseUser) => {
+    setUser({
+      id: user.id,
+      email: user.email!,
+      name: user.user_metadata?.full_name || '',
+      role: 'user',
+    });
+  };
 
-  const login = (role: UserRole = 'admin') => {
-    // In a real app, role would come from your backend
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('userRole', role);
-    setUser(role === 'admin' ? adminUser : regularUser);
+  // 🔐 LOGIN
+  const login = async (email: string, password: string) => {
+    setIsLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setIsLoading(false);
+    if (error) throw error;
     router.push('/');
   };
 
-  const logout = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userRole');
+  // 🆕 SIGNUP (THIS WAS MISSING LOGIC)
+  const signup = async (email: string, password: string) => {
+    setIsLoading(true);
+  
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: 'http://localhost:9002/login',
+      },
+    });
+  
+    setIsLoading(false);
+  
+    if (error) {
+      throw error;
+    }
+  
+    // 🚨 Email confirmation required
+    if (!data.session) {
+      alert('Account created! Please check your email to confirm your account.');
+      router.push('/login');
+      return;
+    }
+  
+    // ✅ Auto-login (if email confirmation is disabled)
+    router.push('/');
+  };
+  
+  // 🚪 LOGOUT
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
     router.push('/login');
   };
-  
-  const isAuthenticated = !!user;
 
-  const hasRole = (role: UserRole) => {
-    return user?.role === role;
-  }
-
-  const value = useMemo(() => ({
-    user,
-    login,
-    logout,
-    isAuthenticated,
-    isLoading,
-    hasRole,
-  }), [user, isAuthenticated, isLoading]);
-
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      user,
+      isAuthenticated: !!user,
+      isLoading,
+      login,
+      signup,
+      logout,
+    }),
+    [user, isLoading]
   );
-};
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuthContext() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuthContext must be used within AuthProvider');
+  return ctx;
+}

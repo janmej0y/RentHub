@@ -1,38 +1,26 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Navbar } from '@/components/Navbar';
 import { AuthProvider } from '@/context/AuthContext';
+import { Navbar } from '@/components/Navbar';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'RoomBase',
+  title: 'RentHub',
   description: 'Find your next rental room with ease.',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400..900&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Source+Code+Pro:wght@400;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="en">
       <body className="font-body antialiased">
         <AuthProvider>
           <div className="flex min-h-screen flex-col">
             <Navbar />
-            <main className="flex-grow">{children}</main>
+            <main className="flex-1">{children}</main>
           </div>
           <Toaster />
         </AuthProvider>
