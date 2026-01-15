@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import type { Room } from '@/types/room';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { IndianRupee, MapPin, BedDouble, Users, Building } from 'lucide-react';
+import { IndianRupee, MapPin, Users } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { formatCurrency } from '@/lib/utils';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -20,9 +20,9 @@ export function RoomCard({ room }: RoomCardProps) {
           <Image
             src={room.images[0]?.url || placeholder?.imageUrl || "https://picsum.photos/seed/1/600/400"}
             alt={room.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            width={600}
+            height={400}
+            className="object-cover w-full h-full"
             data-ai-hint="apartment interior"
           />
         </div>
