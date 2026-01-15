@@ -53,3 +53,52 @@ It is built with **Next.js (App Router)** and **Supabase** for authentication, d
 
 ## 📁 Project Structure
 
+```text
+src/
+├── app/          # App Router pages
+├── components/   # Reusable UI components
+├── context/      # Global auth state
+├── hooks/        # Custom hooks
+├── lib/          # Supabase client & services
+├── types/        # Type definitions
+└── styles/       # Global styles
+---
+🔑 Environment Variables
+Create a .env.local file:
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_PUBLIC_ANON_KEY
+---
+
+---
+
+⚙️ Setup
+
+git clone [https://github.com/your-username/renthub.git](https://github.com/your-username/renthub.git)
+cd renthub
+npm install
+npm run dev
+
+---
+
+
+---
+
+Open: 👉 http://localhost:9002
+
+🎯 What This Project Demonstrates
+Full-stack architecture with real backend integration
+
+Secure authentication & protected routes
+
+Clean, scalable folder structure
+
+Practical use of Supabase with Next.js
+
+Production-ready UI & UX patterns
+
+👨‍💻 Author
+Janmejoy Mahato Full-Stack Developer | Next.js | Supabase | TypeScript
+
+⭐ This project was built as a real-world full-stack application, focusing on scalability, security, and clean architecture.
+
+---
