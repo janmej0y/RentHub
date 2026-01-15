@@ -19,7 +19,7 @@ export function FileUploader({ value, onValueChange }: FileUploaderProps) {
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      if (acceptedFiles.length === 0) return;
+      if (!acceptedFiles.length) return;
 
       setUploading(true);
 
@@ -28,9 +28,9 @@ export function FileUploader({ value, onValueChange }: FileUploaderProps) {
 
         for (const file of acceptedFiles) {
           const fileExt = file.name.split('.').pop();
-          const fileName = `${Date.now()}-${Math.random()
-            .toString(36)
-            .substring(2)}.${fileExt}`;
+          const fileName = `${Date.now()}-${crypto
+            .randomUUID()
+            .slice(0, 8)}.${fileExt}`;
 
           const { error } = await supabase.storage
             .from('room-images')
@@ -39,9 +39,7 @@ export function FileUploader({ value, onValueChange }: FileUploaderProps) {
               upsert: false,
             });
 
-          if (error) {
-            throw error;
-          }
+          if (error) throw error;
 
           const { data } = supabase.storage
             .from('room-images')
@@ -50,11 +48,10 @@ export function FileUploader({ value, onValueChange }: FileUploaderProps) {
           uploadedUrls.push(data.publicUrl);
         }
 
-        const newValue = [...value, ...uploadedUrls];
-        onValueChange(newValue);
+        onValueChange([...value, ...uploadedUrls]);
       } catch (error) {
         console.error('Image upload failed:', error);
-        alert('Failed to upload image. Please try again.');
+        alert('Image upload failed. Please try again.');
       } finally {
         setUploading(false);
       }
@@ -69,7 +66,7 @@ export function FileUploader({ value, onValueChange }: FileUploaderProps) {
         await supabase.storage.from('room-images').remove([fileName]);
       }
     } catch (error) {
-      console.error('Failed to remove image from storage', error);
+      console.error('Failed to remove image:', error);
     }
 
     onValueChange(value.filter(v => v !== url));
@@ -89,7 +86,7 @@ export function FileUploader({ value, onValueChange }: FileUploaderProps) {
         className={cn(
           'flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-8 text-center transition-colors',
           isDragActive && 'border-primary bg-primary/10',
-          uploading && 'opacity-60 cursor-not-allowed'
+          uploading && 'cursor-not-allowed opacity-60'
         )}
       >
         <input {...getInputProps()} />
@@ -104,18 +101,19 @@ export function FileUploader({ value, onValueChange }: FileUploaderProps) {
         </p>
       </div>
 
-      {/* Preview */}
+      {/* Preview Grid */}
       {value.length > 0 && (
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
           {value.map((url, index) => (
             <div
               key={url}
-              className="relative aspect-video w-full overflow-hidden rounded-md"
+              className="relative aspect-video w-full overflow-hidden rounded-md bg-muted"
             >
               <Image
                 src={url}
                 alt={`Room image ${index + 1}`}
                 fill
+                unoptimized
                 className="object-cover"
               />
 
