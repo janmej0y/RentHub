@@ -1,4 +1,4 @@
-# **App Name**: RoomBase
+# **App Name**: RentHub
 
 ## Core Features:
 

@@ -41,6 +41,4 @@ next-env.d.ts
 .env*
 
 # firebase
-firebase-debug.log
-firestore-debug.log
-.env.local
+
