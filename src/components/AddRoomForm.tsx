@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-import { useAuth } from '@/context/AuthContext';
+import { useAuthContext } from '@/context/AuthContext';
 import { addRoom } from '@/lib/roomService';
 import { useToast } from '@/hooks/use-toast';
 import { PropertyTypes, TenantPreferences } from '@/types/room';
