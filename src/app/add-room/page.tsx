@@ -7,16 +7,20 @@ import { useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AddRoomPage() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, hasRole } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login');
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.push('/login');
+      } else if (!hasRole('admin')) {
+        router.push('/'); // Redirect non-admins to home
+      }
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, router, hasRole]);
 
-  if (isLoading || !isAuthenticated) {
+  if (isLoading || !isAuthenticated || !hasRole('admin')) {
     return (
       <div className="container mx-auto max-w-2xl px-4 py-12">
         <Skeleton className="mb-8 h-10 w-1/3" />

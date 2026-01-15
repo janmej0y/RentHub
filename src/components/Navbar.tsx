@@ -8,7 +8,7 @@ import { Home } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 
 export function Navbar() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, hasRole } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -25,7 +25,7 @@ export function Navbar() {
             >
               Find a Room
             </Link>
-            {isAuthenticated && (
+            {isAuthenticated && hasRole('admin') && (
               <>
                 <Link
                   href="/add-room"

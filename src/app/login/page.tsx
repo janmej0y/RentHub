@@ -7,11 +7,13 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Switch } from '@/components/ui/switch';
 
 export default function LoginPage() {
   const { login, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const [isAdminLogin, setIsAdminLogin] = useState(true);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -22,7 +24,7 @@ export default function LoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real app, you would validate credentials here
-    login();
+    login(isAdminLogin ? 'admin' : 'user');
   };
 
   if (isLoading || isAuthenticated) {
@@ -41,11 +43,21 @@ export default function LoginPage() {
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email">Email address</Label>
-                <Input id="email" name="email" type="email" autoComplete="email" required />
+                <Input id="email" name="email" type="email" autoComplete="email" required defaultValue={isAdminLogin ? 'sam.owner@example.com' : 'alex.renter@example.com'} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" name="password" type="password" autoComplete="current-password" required />
+                <Input id="password" name="password" type="password" autoComplete="current-password" required defaultValue="password" />
+              </div>
+              <div className="flex items-center justify-center space-x-2 pt-2">
+                  <Label htmlFor="role-switch">User</Label>
+                  <Switch
+                    id="role-switch"
+                    checked={isAdminLogin}
+                    onCheckedChange={setIsAdminLogin}
+                    aria-label="Switch between admin and user login"
+                  />
+                  <Label htmlFor="role-switch">Admin</Label>
               </div>
               <div>
                 <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90">

@@ -22,7 +22,8 @@ export default function SignUpPage() {
   const handleSignUp = (e: React.FormEvent) => {
     e.preventDefault();
     // In a real app, you would create a user account here
-    login();
+    // For now, we'll sign up as a regular 'user'
+    login('user');
   };
 
   if (isLoading || isAuthenticated) {

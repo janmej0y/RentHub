@@ -24,7 +24,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 
 export default function MyRoomsPage() {
-  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: isAuthLoading, hasRole } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -32,13 +32,17 @@ export default function MyRoomsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      router.push('/login');
+    if (!isAuthLoading) {
+      if (!isAuthenticated) {
+        router.push('/login');
+      } else if (!hasRole('admin')) {
+        router.push('/');
+      }
     }
-  }, [isAuthenticated, isAuthLoading, router]);
+  }, [isAuthenticated, isAuthLoading, router, hasRole]);
 
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user && hasRole('admin')) {
       const fetchOwnerRooms = async () => {
         setIsLoading(true);
         const ownerRooms = await getRoomsByOwner(user.id);
@@ -46,8 +50,10 @@ export default function MyRoomsPage() {
         setIsLoading(false);
       };
       fetchOwnerRooms();
+    } else {
+        setIsLoading(false);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, hasRole]);
   
   const handleDelete = async (roomId: string) => {
     try {
@@ -66,7 +72,7 @@ export default function MyRoomsPage() {
     }
   };
 
-  if (isAuthLoading || !isAuthenticated) {
+  if (isAuthLoading || !isAuthenticated || !hasRole('admin')) {
     return (
        <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
