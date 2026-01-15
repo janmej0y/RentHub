@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 export default function RoomDetailPage({ params }: { params: { id: string } }) {
   const [room, setRoom] = useState<Room | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showContact, setShowContact] = useState(false);
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -128,9 +129,17 @@ export default function RoomDetailPage({ params }: { params: { id: string } }) {
                 </div>
               </div>
               
-              <Button className="w-full mt-8 bg-accent text-accent-foreground hover:bg-accent/90">
-                <Phone className="mr-2 h-4 w-4"/> Contact Owner
-              </Button>
+              {showContact ? (
+                <a href={`tel:${room.ownerContact}`}>
+                  <Button variant="outline" className="w-full mt-8">
+                    <Phone className="mr-2 h-4 w-4" /> {room.ownerContact}
+                  </Button>
+                </a>
+              ) : (
+                <Button onClick={() => setShowContact(true)} className="w-full mt-8 bg-accent text-accent-foreground hover:bg-accent/90">
+                  <Phone className="mr-2 h-4 w-4"/> Contact Owner
+                </Button>
+              )}
 
             </CardContent>
           </Card>
