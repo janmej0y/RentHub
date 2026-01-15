@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       password,
       options: {
-        emailRedirectTo: 'http://localhost:9002/login',
+        emailRedirectTo: 'https://rent-hub-two.vercel.app/login',
       },
     });
   
