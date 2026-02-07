@@ -52,9 +52,6 @@ export async function getRooms(filters: RoomFilter): Promise<Room[]> {
         rating,
         comment,
         created_at,
-        profiles (
-          full_name
-        )
       )
     `
     )
@@ -146,9 +143,6 @@ export async function getMyRooms(userId: string): Promise<Room[]> {
         rating,
         comment,
         created_at,
-        profiles (
-          full_name
-        )
       )
     `
     )
