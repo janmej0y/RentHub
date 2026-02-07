@@ -6,6 +6,15 @@ export type TenantPreference = 'Bachelor' | 'Family' | 'Girls' | 'Working';
 export const TenantPreferences: readonly TenantPreference[] = ['Bachelor', 'Family', 'Girls', 'Working'];
 
 
+export interface Review {
+  id: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment?: string;
+  createdAt: Date;
+}
+
 export interface Room {
   id: string;
   title: string;
@@ -18,4 +27,7 @@ export interface Room {
   images: { url: string; id: string }[];
   createdAt: Date;
   description?: string;
+  approved?: boolean;
+  reviews: Review[];
+  averageRating: number;
 }

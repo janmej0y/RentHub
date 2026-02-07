@@ -25,10 +25,26 @@ export function Navbar() {
             >
               Find a Room
             </Link>
-            {isAuthenticated && ('admin') && (
+            {isAuthenticated && (
+              <Link
+                href="/my-wishlist"
+                className="transition-colors hover:text-foreground/80 text-foreground/60"
+              >
+                My Wishlist
+              </Link>
+            )}
+            {isAuthenticated && (
+                <Link
+                    href="/my-bookings"
+                    className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                    My Bookings
+                </Link>
+            )}
+            {isAuthenticated && user?.role === 'admin' && (
               <>
                 <Link
-                  href="/add-room"
+                  href="/admin/add-room"
                   className="transition-colors hover:text-foreground/80 text-foreground/60"
                 >
                   Add Room
@@ -38,6 +54,18 @@ export function Navbar() {
                   className="transition-colors hover:text-foreground/80 text-foreground/60"
                 >
                   My Rooms
+                </Link>
+                <Link
+                  href="/admin/approvals"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Approvals
+                </Link>
+                <Link
+                  href="/admin/dashboard"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Dashboard
                 </Link>
               </>
             )}

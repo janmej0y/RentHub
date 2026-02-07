@@ -8,7 +8,7 @@ import { useAuthContext } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AddRoomPage() {
-  const { isAuthenticated, isLoading } = useAuthContext();
+  const { user, isAuthenticated, isLoading } = useAuthContext();
   const router = useRouter();
 
   // 🔐 Protect route (Supabase Auth)
@@ -16,10 +16,13 @@ export default function AddRoomPage() {
     if (!isLoading && !isAuthenticated) {
       router.replace('/login');
     }
-  }, [isAuthenticated, isLoading, router]);
+    if (!isLoading && isAuthenticated && user?.role !== 'admin') {
+      router.replace('/');
+    }
+  }, [isAuthenticated, isLoading, router, user]);
 
   // ⏳ Loading / redirect state
-  if (isLoading || !isAuthenticated) {
+  if (isLoading || !isAuthenticated || user?.role !== 'admin') {
     return (
       <div className="container mx-auto max-w-2xl px-4 py-12">
         <Skeleton className="mb-8 h-10 w-1/3" />

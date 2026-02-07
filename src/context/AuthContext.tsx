@@ -17,7 +17,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string) => Promise<void>;
+  signup: (email: string, password: string, name: string, role?: 'user' | 'admin') => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       id: user.id,
       email: user.email!,
       name: user.user_metadata?.full_name || '',
-      role: 'user',
+      role: user.app_metadata?.role || 'user',
     });
   };
 
@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // 🆕 SIGNUP (THIS WAS MISSING LOGIC)
-  const signup = async (email: string, password: string) => {
+  const signup = async (email: string, password: string, name: string, role: 'user' | 'admin' = 'user') => {
     setIsLoading(true);
   
     const { data, error } = await supabase.auth.signUp({
@@ -73,6 +73,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
       options: {
         emailRedirectTo: 'http://localhost:9002/login',
+        data: {
+          full_name: name,
+          role: role,
+        }
       },
     });
   

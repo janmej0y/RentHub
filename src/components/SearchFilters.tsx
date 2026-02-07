@@ -13,16 +13,37 @@ import { PropertyTypes, TenantPreferences } from '@/types/room';
 import { formatCurrency } from '@/lib/utils';
 import { Separator } from './ui/separator';
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
+import { Amenities, FurnishingStatuses, SortBy } from '@/lib/roomService';
+
+// ... (imports)
+
 interface SearchFiltersProps {
   initialFilters: RoomFilter;
   onFilterChange: (filters: Partial<RoomFilter>) => void;
 }
 
-export function SearchFilters({ onFilterChange, initialFilters }: SearchFiltersProps) {
+export function SearchFilters({
+  onFilterChange,
+  initialFilters,
+}: SearchFiltersProps) {
   const [location, setLocation] = useState(initialFilters.location);
   const [priceRange, setPriceRange] = useState(initialFilters.priceRange);
   const [propertyType, setPropertyType] = useState(initialFilters.propertyType);
-  const [tenantPreference, setTenantPreference] = useState(initialFilters.tenantPreference);
+  const [tenantPreference, setTenantPreference] = useState(
+    initialFilters.tenantPreference
+  );
+  const [amenities, setAmenities] = useState(initialFilters.amenities);
+  const [furnishingStatus, setFurnishingStatus] = useState(
+    initialFilters.furnishingStatus
+  );
+  const [sortBy, setSortBy] = useState(initialFilters.sortBy);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -30,15 +51,15 @@ export function SearchFilters({ onFilterChange, initialFilters }: SearchFiltersP
     }, 500);
     return () => clearTimeout(handler);
   }, [location, onFilterChange]);
-  
+
   const handlePriceChange = (value: number[]) => {
     setPriceRange(value as [number, number]);
   };
-  
+
   const applyPriceFilter = () => {
     onFilterChange({ priceRange });
   };
-  
+
   const handlePropertyTypeChange = (type: typeof PropertyTypes[0]) => {
     const newTypes = propertyType.includes(type)
       ? propertyType.filter(t => t !== type)
@@ -46,8 +67,10 @@ export function SearchFilters({ onFilterChange, initialFilters }: SearchFiltersP
     setPropertyType(newTypes);
     onFilterChange({ propertyType: newTypes });
   };
-  
-  const handleTenantPreferenceChange = (type: typeof TenantPreferences[0]) => {
+
+  const handleTenantPreferenceChange = (
+    type: typeof TenantPreferences[0]
+  ) => {
     const newPrefs = tenantPreference.includes(type)
       ? tenantPreference.filter(p => p !== type)
       : [...tenantPreference, type];
@@ -55,15 +78,56 @@ export function SearchFilters({ onFilterChange, initialFilters }: SearchFiltersP
     onFilterChange({ tenantPreference: newPrefs });
   };
 
+  const handleAmenityChange = (amenity: typeof Amenities[0]) => {
+    const newAmenities = amenities.includes(amenity)
+      ? amenities.filter(a => a !== amenity)
+      : [...amenities, amenity];
+    setAmenities(newAmenities);
+    onFilterChange({ amenities: newAmenities });
+  };
+
+  const handleFurnishingStatusChange = (
+    status: typeof FurnishingStatuses[0]
+  ) => {
+    const newStatus = furnishingStatus.includes(status)
+      ? furnishingStatus.filter(s => s !== status)
+      : [...furnishingStatus, status];
+    setFurnishingStatus(newStatus);
+    onFilterChange({ furnishingStatus: newStatus });
+  };
+
+  const handleSortByChange = (value: SortBy) => {
+    setSortBy(value);
+    onFilterChange({ sortBy: value });
+  };
+
   const clearFilters = () => {
     setLocation('');
     setPriceRange([0, 50000]);
     setPropertyType([]);
     setTenantPreference([]);
-    onFilterChange({ location: '', priceRange: [0, 50000], propertyType: [], tenantPreference: [] });
+    setAmenities([]);
+    setFurnishingStatus([]);
+    setSortBy('date_desc');
+    onFilterChange({
+      location: '',
+      priceRange: [0, 50000],
+      propertyType: [],
+      tenantPreference: [],
+      amenities: [],
+      furnishingStatus: [],
+      sortBy: 'date_desc',
+    });
   };
 
-  const hasActiveFilters = location || priceRange[0] !== 0 || priceRange[1] !== 50000 || propertyType.length > 0 || tenantPreference.length > 0;
+  const hasActiveFilters =
+    location ||
+    priceRange[0] !== 0 ||
+    priceRange[1] !== 50000 ||
+    propertyType.length > 0 ||
+    tenantPreference.length > 0 ||
+    amenities.length > 0 ||
+    furnishingStatus.length > 0;
 
   return (
     <div className="flex flex-col md:flex-row items-center gap-4 rounded-lg border bg-card p-4 shadow-sm">
@@ -73,7 +137,7 @@ export function SearchFilters({ onFilterChange, initialFilters }: SearchFiltersP
           placeholder="Search by location (e.g., Bengaluru)"
           className="pl-10"
           value={location}
-          onChange={(e) => setLocation(e.target.value)}
+          onChange={e => setLocation(e.target.value)}
         />
       </div>
       <div className="flex w-full md:w-auto items-center gap-2">
@@ -118,7 +182,12 @@ export function SearchFilters({ onFilterChange, initialFilters }: SearchFiltersP
                         checked={propertyType.includes(type)}
                         onCheckedChange={() => handlePropertyTypeChange(type)}
                       />
-                      <Label htmlFor={`prop-${type}`} className="font-normal">{type}</Label>
+                      <Label
+                        htmlFor={`prop-${type}`}
+                        className="font-normal"
+                      >
+                        {type}
+                      </Label>
                     </div>
                   ))}
                 </div>
@@ -138,7 +207,100 @@ export function SearchFilters({ onFilterChange, initialFilters }: SearchFiltersP
                         checked={tenantPreference.includes(pref)}
                         onCheckedChange={() => handleTenantPreferenceChange(pref)}
                       />
-                      <Label htmlFor={`tenant-${pref}`} className="font-normal">{pref}</Label>
+                      <Label
+                        htmlFor={`tenant-${pref}`}
+                        className="font-normal"
+                      >
+                        {pref}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <Label className="mb-4 flex items-center gap-2 text-sm font-medium">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4"
+                  >
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                  Amenities
+                </Label>
+                <div className="space-y-2">
+                  {Amenities.map(amenity => (
+                    <div
+                      key={amenity}
+                      className="flex items-center space-x-2"
+                    >
+                      <Checkbox
+                        id={`amenity-${amenity}`}
+                        checked={amenities.includes(amenity)}
+                        onCheckedChange={() => handleAmenityChange(amenity)}
+                      />
+                      <Label
+                        htmlFor={`amenity-${amenity}`}
+                        className="font-normal"
+                      >
+                        {amenity}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div>
+                <Label className="mb-4 flex items-center gap-2 text-sm font-medium">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4"
+                  >
+                    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                    <path d="M3 12h18v6" />
+                    <path d="M12 12v6" />
+                  </svg>
+                  Furnishing
+                </Label>
+                <div className="space-y-2">
+                  {FurnishingStatuses.map(status => (
+                    <div
+                      key={status}
+                      className="flex items-center space-x-2"
+                    >
+                      <Checkbox
+                        id={`furnish-${status}`}
+                        checked={furnishingStatus.includes(status)}
+                        onCheckedChange={() =>
+                          handleFurnishingStatusChange(status)
+                        }
+                      />
+                      <Label
+                        htmlFor={`furnish-${status}`}
+                        className="font-normal"
+                      >
+                        {status}
+                      </Label>
                     </div>
                   ))}
                 </div>
@@ -147,8 +309,25 @@ export function SearchFilters({ onFilterChange, initialFilters }: SearchFiltersP
           </PopoverContent>
         </Popover>
 
+        <Select onValueChange={handleSortByChange} value={sortBy}>
+          <SelectTrigger className="w-full md:w-auto">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="date_desc">Newest</SelectItem>
+            <SelectItem value="rent_asc">Price: Low to High</SelectItem>
+            <SelectItem value="rent_desc">Price: High to Low</SelectItem>
+            <SelectItem value="rating_desc">Rating</SelectItem>
+          </SelectContent>
+        </Select>
+
         {hasActiveFilters && (
-          <Button variant="ghost" size="icon" onClick={clearFilters} title="Clear filters">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={clearFilters}
+            title="Clear filters"
+          >
             <X className="h-4 w-4" />
           </Button>
         )}
@@ -156,3 +335,4 @@ export function SearchFilters({ onFilterChange, initialFilters }: SearchFiltersP
     </div>
   );
 }
+

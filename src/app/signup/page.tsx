@@ -26,9 +26,10 @@ export default function SignUpPage() {
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
+    const isAdmin = formData.get('isAdmin') as string;
 
     try {
-      await signup(email, password, name);
+      await signup(email, password, name, isAdmin ? 'admin' : 'user');
     } catch (err: any) {
       alert(err.message);
     }
@@ -58,6 +59,11 @@ export default function SignUpPage() {
             <div>
               <Label htmlFor="password">Password</Label>
               <Input id="password" name="password" type="password" required />
+            </div>
+
+            <div className="flex items-center">
+              <Input id="isAdmin" name="isAdmin" type="checkbox" className="mr-2" />
+              <Label htmlFor="isAdmin">Sign up as an admin</Label>
             </div>
 
             <Button type="submit" className="w-full">

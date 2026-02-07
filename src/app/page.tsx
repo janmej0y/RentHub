@@ -13,6 +13,9 @@ export default function Home() {
     priceRange: [0, 50000],
     propertyType: [],
     tenantPreference: [],
+    amenities: [], // Add this
+    furnishingStatus: [], // Add this if required by RoomFilter
+    sortBy: 'date_desc', // Add this
   });
 
   const [rooms, setRooms] = useState<Room[]>([]);

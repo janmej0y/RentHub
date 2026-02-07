@@ -1,33 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { useAuthContext } from '@/context/AuthContext';
-import { getMyRooms, deleteRoom } from '@/lib/roomService';
+import { getMyRooms } from '@/lib/roomService';
 import type { Room } from '@/types/room';
 
 import { RoomCard } from '@/components/RoomCard';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { PlusCircle } from 'lucide-react';
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-
-import { PlusCircle, Trash2, Edit, AlertTriangle, Eye } from 'lucide-react';
-
-export default function MyRoomsPage() {
+export default function DashboardPage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuthContext();
   const router = useRouter();
   const { toast } = useToast();
@@ -40,11 +27,14 @@ export default function MyRoomsPage() {
     if (!authLoading && !isAuthenticated) {
       router.replace('/login');
     }
-  }, [authLoading, isAuthenticated, router]);
+    if (!authLoading && isAuthenticated && user?.role !== 'admin') {
+      router.replace('/');
+    }
+  }, [authLoading, isAuthenticated, router, user]);
 
-  // 📦 Fetch logged-in user's rooms
+  // 📦 Fetch landlord's rooms
   useEffect(() => {
-    if (!authLoading && isAuthenticated && user) {
+    if (!authLoading && isAuthenticated && user?.role === 'admin') {
       const fetchRooms = async () => {
         try {
           setIsLoading(true);
@@ -65,26 +55,8 @@ export default function MyRoomsPage() {
     }
   }, [authLoading, isAuthenticated, user, toast]);
 
-  // 🗑 Delete room
-  const handleDelete = async (roomId: string) => {
-    try {
-      await deleteRoom(roomId);
-      setRooms(prev => prev.filter(room => room.id !== roomId));
-      toast({
-        title: 'Room deleted',
-        description: 'Your room listing has been removed.',
-      });
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Delete failed',
-        description: error?.message || 'Unable to delete room',
-      });
-    }
-  };
-
   // ⏳ Loading / redirect state
-  if (authLoading || !isAuthenticated) {
+  if (authLoading || !isAuthenticated || user?.role !== 'admin') {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
@@ -110,7 +82,7 @@ export default function MyRoomsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
         <div>
-          <h1 className="font-headline text-4xl font-bold">My Rooms</h1>
+          <h1 className="font-headline text-4xl font-bold">Dashboard</h1>
           <p className="mt-2 text-muted-foreground">
             Manage your listed properties.
           </p>
@@ -130,7 +102,7 @@ export default function MyRoomsPage() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="space-y-4">
               <Skeleton className="h-56 w-full rounded-lg" />
-              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-6 w-3/g" />
               <Skeleton className="h-4 w-1/2" />
             </div>
           ))}
@@ -140,58 +112,14 @@ export default function MyRoomsPage() {
           {rooms.map(room => (
             <div key={room.id} className="relative group">
               <RoomCard room={room} />
-
-              {/* Actions */}
-              <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button size="icon" variant="secondary" asChild>
-                  <Link href={`/rooms/${room.id}`} title="View Room">
-                    <Eye className="h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button size="icon" variant="secondary" asChild>
-                  <Link href={`/admin/edit-room/${room.id}`} title="Edit Room">
-                    <Edit className="h-4 w-4" />
-                  </Link>
-                </Button>
-
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button size="icon" variant="destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="flex items-center gap-2">
-                        <AlertTriangle className="text-destructive" />
-                        Are you sure?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone. This will permanently
-                        delete your room listing.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        className="bg-destructive hover:bg-destructive/90"
-                        onClick={() => handleDelete(room.id)}
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
+              {/* Add actions here */}
             </div>
           ))}
         </div>
       ) : (
         <div className="text-center rounded-lg border-2 border-dashed border-border bg-card p-12">
           <h3 className="text-xl font-semibold">
-            You haven&apos;t listed any rooms yet.
+            You haven't listed any rooms yet.
           </h3>
           <p className="mt-2 text-sm text-muted-foreground">
             Get started by adding your first property.
