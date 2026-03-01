@@ -12,6 +12,33 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { formatCurrency } from '@/lib/utils';
+import { Download } from 'lucide-react';
+
+function downloadBookingReceipt(booking: Booking) {
+  const lines = [
+    'RentHub Booking Receipt',
+    '-----------------------',
+    `Booking ID: ${booking.id}`,
+    `Property: ${booking.room.title}`,
+    `Location: ${booking.room.location}`,
+    `Monthly Rent: ${formatCurrency(booking.room.rent)}`,
+    `Check-in: ${new Date(booking.checkIn).toLocaleDateString('en-IN')}`,
+    `Check-out: ${new Date(booking.checkOut).toLocaleDateString('en-IN')}`,
+    `Status: ${booking.status === 'pending' ? 'Pending Review' : 'Confirmed'}`,
+    `Generated At: ${new Date().toLocaleString('en-IN')}`,
+  ];
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `booking-receipt-${booking.id}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
 
 export default function MyBookingsPage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuthContext();
@@ -96,6 +123,9 @@ export default function MyBookingsPage() {
                     {booking.status === 'pending' ? 'Pending Review' : 'Confirmed'}
                   </Badge>
                 </div>
+                <div className="mt-3 rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
+                  Timeline: Submitted {'->'} Payment Review {'->'} Confirmed
+                </div>
                 {booking.paymentScreenshotName ? (
                   <div className="mt-3">
                     <p className="text-xs text-muted-foreground">
@@ -114,6 +144,12 @@ export default function MyBookingsPage() {
                     ) : null}
                   </div>
                 ) : null}
+                <div className="mt-4">
+                  <Button variant="outline" size="sm" onClick={() => downloadBookingReceipt(booking)}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Receipt
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}

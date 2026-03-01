@@ -21,6 +21,7 @@ export function RoomCard({ room, isPriority = true }: RoomCardProps) {
   const { toast } = useToast();
   const [inWishlist, setInWishlist] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   useEffect(() => {
     async function checkWishlist() {
@@ -75,9 +76,10 @@ export function RoomCard({ room, isPriority = true }: RoomCardProps) {
   const isRecent = Date.now() - room.createdAt.getTime() < 1000 * 60 * 60 * 24 * 3;
 
   return (
-    <Card className="group h-full w-full overflow-hidden transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
+    <Card className="group h-full w-full overflow-hidden border-border/70 bg-card/90 transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
       <CardHeader className="p-0">
         <div className="relative aspect-video w-full overflow-hidden bg-muted">
+          {!isImageLoaded && <div className="pulse-shimmer absolute inset-0 bg-muted/80" />}
           <Image
             src={cardImageUrl}
             alt={room.title}
@@ -85,8 +87,11 @@ export function RoomCard({ room, isPriority = true }: RoomCardProps) {
             height={400}
             priority={isPriority}
             quality={60}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className={`h-full w-full object-cover transition-all duration-500 group-hover:scale-105 ${
+              isImageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            onLoad={() => setIsImageLoaded(true)}
           />
           <div className="absolute left-2 top-2 flex items-center gap-2">
             {isRecent && <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">New</Badge>}
@@ -114,7 +119,7 @@ export function RoomCard({ room, isPriority = true }: RoomCardProps) {
           </Badge>
         </div>
 
-        <p className="line-clamp-2 text-xs text-muted-foreground">{imageCaption}</p>
+        <p className="line-clamp-2 text-xs text-muted-foreground/90">{imageCaption}</p>
 
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <MapPin className="h-4 w-4" />
@@ -137,7 +142,7 @@ export function RoomCard({ room, isPriority = true }: RoomCardProps) {
           <span>{room.tenantPreference}</span>
         </div>
 
-        <p className="line-clamp-2 text-sm text-muted-foreground">{shortDescription}</p>
+        <p className="line-clamp-2 text-sm text-muted-foreground/90">{shortDescription}</p>
       </CardContent>
     </Card>
   );

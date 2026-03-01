@@ -6,12 +6,13 @@ import {
   useRouter,
 } from 'next/navigation';
 import Image from 'next/image';
-import { getRoomById } from '@/lib/roomService';
+import Link from 'next/link';
+import { getRoomById, getRooms } from '@/lib/roomService';
 import type { Room } from '@/types/room';
 import { formatCurrency } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { IndianRupee, MapPin, Users, Phone, Star, ArrowLeft } from 'lucide-react';
+import { IndianRupee, MapPin, Users, Phone, Star, ArrowLeft, ShieldCheck, Clock3 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useAuthContext } from '@/context/AuthContext';
@@ -28,6 +29,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const RECENT_ROOMS_KEY = 'renthub-recent-rooms';
 
 function StarRating({ rating, size = 5 }: { rating: number; size?: number }) {
   const sizeClass = `h-${size} w-${size}`;
@@ -99,9 +103,39 @@ function ReviewForm({ roomId, onReviewAdded }: { roomId: string; onReviewAdded: 
 }
 
 function ReviewList({ reviews }: { reviews: Room['reviews'] }) {
+  const [sortBy, setSortBy] = useState<'latest' | 'highest' | 'oldest'>('latest');
+  const sortedReviews = [...reviews].sort((a, b) => {
+    if (sortBy === 'highest') return b.rating - a.rating;
+    if (sortBy === 'oldest') return a.createdAt.getTime() - b.createdAt.getTime();
+    return b.createdAt.getTime() - a.createdAt.getTime();
+  });
+
+  if (sortedReviews.length === 0) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-sm text-muted-foreground">
+          No reviews yet. Be the first to share your experience.
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {reviews.map(review => (
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">Verified renter reviews</p>
+        <Select value={sortBy} onValueChange={value => setSortBy(value as 'latest' | 'highest' | 'oldest')}>
+          <SelectTrigger className="h-9 w-[180px]">
+            <SelectValue placeholder="Sort reviews" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="latest">Most recent</SelectItem>
+            <SelectItem value="highest">Highest rating</SelectItem>
+            <SelectItem value="oldest">Oldest first</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      {sortedReviews.map(review => (
         <Card key={review.id}>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -128,6 +162,7 @@ export default function RoomDetailPage() {
   const [room, setRoom] = useState<Room | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showContact, setShowContact] = useState(false);
+  const [similarRooms, setSimilarRooms] = useState<Room[]>([]);
   const { isAuthenticated } = useAuthContext();
 
   const router = useRouter();
@@ -156,6 +191,22 @@ export default function RoomDetailPage() {
         reviews: mergedReviews,
         averageRating,
       });
+
+      try {
+        const city = fetchedRoom.location.split(',').slice(-1)[0]?.trim() || fetchedRoom.location;
+        const related = await getRooms({
+          location: city,
+          priceRange: [0, 50000],
+          propertyType: [],
+          tenantPreference: [],
+          amenities: [],
+          furnishingStatus: [],
+          sortBy: 'rating_desc',
+        });
+        setSimilarRooms(related.filter(item => item.id !== fetchedRoom.id).slice(0, 6));
+      } catch {
+        setSimilarRooms([]);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -164,6 +215,18 @@ export default function RoomDetailPage() {
   useEffect(() => {
     if (roomId) {
       fetchRoom(roomId);
+    }
+  }, [roomId]);
+
+  useEffect(() => {
+    if (!roomId) return;
+    try {
+      const existing = window.localStorage.getItem(RECENT_ROOMS_KEY);
+      const parsed = existing ? (JSON.parse(existing) as string[]) : [];
+      const next = [roomId, ...parsed.filter(item => item !== roomId)].slice(0, 10);
+      window.localStorage.setItem(RECENT_ROOMS_KEY, JSON.stringify(next));
+    } catch {
+      // Ignore local storage issues.
     }
   }, [roomId]);
 
@@ -269,6 +332,17 @@ export default function RoomDetailPage() {
                 <span>Preferred: {room.tenantPreference}</span>
               </div>
 
+              <div className="grid grid-cols-1 gap-2 rounded-lg border bg-muted/25 p-3 text-sm text-muted-foreground">
+                <p className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-accent" />
+                  Verified listing with documented ownership details
+                </p>
+                <p className="flex items-center gap-2">
+                  <Clock3 className="h-4 w-4 text-accent" />
+                  Availability updates are reviewed daily
+                </p>
+              </div>
+
               {showContact ? (
                 <a href={`tel:${room.ownerContact}`}>
                   <Button variant="outline" className="mt-6 w-full">
@@ -311,6 +385,25 @@ export default function RoomDetailPage() {
         )}
         <ReviewList reviews={room.reviews} />
       </div>
+
+      {similarRooms.length > 0 && (
+        <div className="mt-12">
+          <h2 className="mb-4 text-2xl font-headline font-bold">Similar Properties</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {similarRooms.map(item => (
+              <Link
+                key={item.id}
+                href={`/rooms/${item.id}`}
+                className="card-reveal rounded-xl border border-border/70 bg-card/90 p-4 transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <p className="font-semibold">{item.title}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{item.location}</p>
+                <p className="mt-2 text-sm font-medium">{formatCurrency(item.rent)}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -414,13 +507,23 @@ function BookingForm({ roomId }: { roomId: string }) {
       <h3 className="mb-4 font-headline text-2xl font-bold">Book this room</h3>
 
       {bookingStatus === 'pending' ? (
-        <Button className="w-full" disabled>
-          After reviewing the transaction, it will be confirmed
-        </Button>
+        <div className="space-y-3">
+          <Button className="w-full" disabled>
+            After reviewing the transaction, it will be confirmed
+          </Button>
+          <div className="rounded-md border border-amber-300/60 bg-amber-50 p-3 text-sm text-amber-800">
+            Booking timeline: Submitted {'->'} Payment Review {'->'} Confirmed
+          </div>
+        </div>
       ) : bookingStatus === 'confirmed' ? (
-        <Button className="w-full" disabled>
-          Booking Confirmed
-        </Button>
+        <div className="space-y-3">
+          <Button className="w-full" disabled>
+            Booking Confirmed
+          </Button>
+          <div className="rounded-md border border-emerald-300/60 bg-emerald-50 p-3 text-sm text-emerald-800">
+            Booking timeline: Submitted {'->'} Payment Review {'->'} Confirmed
+          </div>
+        </div>
       ) : null}
 
       {bookingStatus !== 'none' ? null : !isBookingOpen ? (

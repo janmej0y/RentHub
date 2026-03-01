@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { uploadProfilePhoto } from '@/lib/storageService';
+import { Progress } from '@/components/ui/progress';
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading: authLoading, updateProfile } = useAuthContext();
@@ -56,6 +57,16 @@ export default function ProfilePage() {
       .slice(0, 2)
       .toUpperCase();
   }, [name, user?.name]);
+
+  const profileCompletion = useMemo(() => {
+    let score = 0;
+    if (name.trim()) score += 25;
+    if (phone.trim()) score += 20;
+    if (city.trim()) score += 20;
+    if (bio.trim()) score += 15;
+    if (avatarUrl) score += 20;
+    return score;
+  }, [avatarUrl, bio, city, name, phone]);
 
   const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -130,6 +141,19 @@ export default function ProfilePage() {
         <h1 className="font-headline text-4xl font-bold">My Profile</h1>
         <p className="mt-2 text-muted-foreground">Manage your profile details and account preferences.</p>
       </div>
+
+      <Card className="mb-6 border-border/70 bg-card/90">
+        <CardContent className="space-y-3 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="font-medium">Profile Completion</p>
+            <Badge variant={profileCompletion >= 80 ? 'default' : 'secondary'}>{profileCompletion}%</Badge>
+          </div>
+          <Progress value={profileCompletion} />
+          <p className="text-xs text-muted-foreground">
+            Complete your profile to improve trust and get better recommendations.
+          </p>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
@@ -232,6 +256,21 @@ export default function ProfilePage() {
               <p className="mt-2 flex items-center gap-2">
                 <Camera className="h-4 w-4" /> Your uploaded profile photo appears in the top-right account menu.
               </p>
+            </div>
+
+            <div className="mt-4 rounded-xl border bg-card/70 p-4">
+              <h3 className="font-medium">Account Quick Actions</h3>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button type="button" variant="outline" asChild>
+                  <Link href="/">Explore Properties</Link>
+                </Button>
+                <Button type="button" variant="outline" asChild>
+                  <Link href="/my-bookings">Track Booking Status</Link>
+                </Button>
+                <Button type="button" variant="outline" asChild>
+                  <Link href="/my-wishlist">Review Saved Homes</Link>
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
