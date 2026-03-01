@@ -66,6 +66,7 @@ const INDIA_LOCATIONS = [
 
 const PROPERTY_TYPES: Room['propertyType'][] = ['1 BHK', '2 BHK', '1 Bed', '2 Bed', '3 Bed'];
 const TENANT_PREFS: Room['tenantPreference'][] = ['Bachelor', 'Family', 'Girls', 'Working'];
+const AMENITIES_POOL = ['WiFi', 'AC', 'Parking', 'Kitchen', 'Power Backup', 'Geyser', 'Lift'];
 const INDIAN_REVIEWERS = [
   'Aarav Sharma',
   'Priya Nair',
@@ -136,6 +137,16 @@ function buildDescription(
   return `${title} is located in ${location} and is ideal for ${tenantPreference.toLowerCase()} tenants. This ${propertyType} unit includes well-planned interiors, good daylight, reliable water and power supply, and easy access to schools, offices, transit, and daily essentials. The property is maintained for immediate move-in and offers a practical layout for long-term rental comfort.`;
 }
 
+function buildAmenities(index: number): string[] {
+  const set = new Set<string>([
+    AMENITIES_POOL[index % AMENITIES_POOL.length],
+    AMENITIES_POOL[(index + 2) % AMENITIES_POOL.length],
+    AMENITIES_POOL[(index + 4) % AMENITIES_POOL.length],
+    'WiFi',
+  ]);
+  return Array.from(set);
+}
+
 export const mockRooms: Room[] = INDIA_LOCATIONS.map((location, index) => {
   const roomNumber = index + 1;
   const propertyType = PROPERTY_TYPES[index % PROPERTY_TYPES.length];
@@ -160,6 +171,7 @@ export const mockRooms: Room[] = INDIA_LOCATIONS.map((location, index) => {
     tenantPreference,
     ownerContact: '7477661933',
     ownerId: roomNumber <= 12 ? 'mock-admin-1' : `mock-owner-${(index % 8) + 2}`,
+    amenities: buildAmenities(index),
     images: buildImages(roomNumber, location),
     createdAt: new Date(Date.now() - roomNumber * 1000 * 60 * 60 * 12),
     description: buildDescription(title, location, propertyType, tenantPreference),

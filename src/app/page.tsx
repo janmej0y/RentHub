@@ -1,8 +1,18 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Search, TrendingUp, Building2, WalletCards, MapPinned, Sparkles, BookmarkPlus } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  Search,
+  TrendingUp,
+  Building2,
+  WalletCards,
+  MapPinned,
+  Sparkles,
+  BookmarkPlus,
+  X,
+  GitCompareArrows,
+} from 'lucide-react';
 import { RoomGrid } from '@/components/RoomGrid';
 import { SearchFilters } from '@/components/SearchFilters';
 import { getRooms, type RoomFilter } from '@/lib/roomService';
@@ -12,6 +22,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { EmptyState } from '@/components/EmptyState';
 
 const PAGE_SIZE = 10;
 const QUICK_LOCATIONS = ['Bengaluru', 'Mumbai', 'Hyderabad', 'Pune', 'New Delhi', 'Chennai'];
@@ -21,6 +32,7 @@ type ViewMode = 'list' | 'map';
 
 export default function Home() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [filters, setFilters] = useState<RoomFilter>({
     location: '',
@@ -38,7 +50,13 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [savedSearches, setSavedSearches] = useState<string[]>([]);
   const [recentRoomIds, setRecentRoomIds] = useState<string[]>([]);
+  const [comparedRoomIds, setComparedRoomIds] = useState<string[]>([]);
+  const [mapFocusCity, setMapFocusCity] = useState<string>('Bengaluru');
   const requestIdRef = useRef(0);
+
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+  }, []);
 
   const handleFilterChange = useCallback((newFilters: Partial<RoomFilter>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
@@ -55,6 +73,13 @@ export default function Home() {
       setRecentRoomIds([]);
     }
   }, []);
+
+  useEffect(() => {
+    const locationParam = searchParams.get('location');
+    if (locationParam) {
+      setFilters(prev => ({ ...prev, location: locationParam }));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const currentRequestId = ++requestIdRef.current;
@@ -125,6 +150,12 @@ export default function Home() {
       .slice(0, 9);
   }, [rooms]);
 
+  useEffect(() => {
+    if (locationInsights.length > 0) {
+      setMapFocusCity(prev => prev || locationInsights[0].city);
+    }
+  }, [locationInsights]);
+
   const recentRooms = useMemo(() => {
     const ids = new Set(recentRoomIds);
     return rooms.filter(room => ids.has(room.id)).slice(0, 4);
@@ -154,6 +185,67 @@ export default function Home() {
     window.localStorage.setItem(SAVED_SEARCHES_KEY, JSON.stringify(next));
     toast({ title: 'Search saved', description: `"${keyword}" added to saved searches.` });
   };
+
+  const activeFilterChips = useMemo(() => {
+    const chips: { id: string; label: string; onRemove: () => void }[] = [];
+    if (filters.location.trim()) {
+      chips.push({
+        id: `location-${filters.location}`,
+        label: `Location: ${filters.location}`,
+        onRemove: () => handleFilterChange({ location: '' }),
+      });
+    }
+    if (filters.priceRange[0] !== 0 || filters.priceRange[1] !== 50000) {
+      chips.push({
+        id: 'price',
+        label: `Price: ${formatCurrency(filters.priceRange[0])} - ${formatCurrency(filters.priceRange[1])}`,
+        onRemove: () => handleFilterChange({ priceRange: [0, 50000] }),
+      });
+    }
+    filters.propertyType.forEach(type =>
+      chips.push({
+        id: `ptype-${type}`,
+        label: type,
+        onRemove: () =>
+          handleFilterChange({
+            propertyType: filters.propertyType.filter(item => item !== type),
+          }),
+      })
+    );
+    filters.tenantPreference.forEach(pref =>
+      chips.push({
+        id: `tpref-${pref}`,
+        label: pref,
+        onRemove: () =>
+          handleFilterChange({
+            tenantPreference: filters.tenantPreference.filter(item => item !== pref),
+          }),
+      })
+    );
+    return chips;
+  }, [filters, handleFilterChange]);
+
+  const handleCompareToggle = (roomId: string) => {
+    setComparedRoomIds(prev => {
+      if (prev.includes(roomId)) {
+        return prev.filter(id => id !== roomId);
+      }
+      if (prev.length >= 3) {
+        toast({
+          variant: 'destructive',
+          title: 'Compare limit reached',
+          description: 'You can compare up to 3 properties at a time.',
+        });
+        return prev;
+      }
+      return [...prev, roomId];
+    });
+  };
+
+  const comparedRooms = useMemo(
+    () => rooms.filter(room => comparedRoomIds.includes(room.id)),
+    [rooms, comparedRoomIds]
+  );
 
   return (
     <div className="container mx-auto space-y-8 px-4 py-8">
@@ -220,6 +312,22 @@ export default function Home() {
         <SearchFilters onFilterChange={handleFilterChange} initialFilters={filters} />
       </div>
 
+      {activeFilterChips.length > 0 && (
+        <section className="flex flex-wrap items-center gap-2 rounded-lg border border-border/70 bg-card/80 p-3">
+          {activeFilterChips.map(chip => (
+            <button
+              key={chip.id}
+              type="button"
+              onClick={chip.onRemove}
+              className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-background px-3 py-1 text-xs transition hover:border-accent/50"
+            >
+              {chip.label}
+              <X className="h-3.5 w-3.5" />
+            </button>
+          ))}
+        </section>
+      )}
+
       <section className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Sparkles className="h-4 w-4 text-accent" />
@@ -227,16 +335,18 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-2">
           <Button
+            type="button"
             size="sm"
             variant={viewMode === 'list' ? 'default' : 'outline'}
-            onClick={() => setViewMode('list')}
+            onClick={() => handleViewModeChange('list')}
           >
             List View
           </Button>
           <Button
+            type="button"
             size="sm"
             variant={viewMode === 'map' ? 'default' : 'outline'}
-            onClick={() => setViewMode('map')}
+            onClick={() => handleViewModeChange('map')}
           >
             <MapPinned className="mr-2 h-4 w-4" />
             Map View
@@ -244,7 +354,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="space-y-4">
+      <section key={viewMode} className="space-y-4">
         {isLoading ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -266,32 +376,68 @@ export default function Home() {
             {rooms.length > 0 ? (
               <>
                 {viewMode === 'map' ? (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {locationInsights.map(item => (
-                      <Card key={item.city} className="card-reveal border-border/70 bg-card/90">
-                        <CardContent className="space-y-2 p-4">
-                          <div className="flex items-center justify-between">
-                            <h3 className="font-semibold">{item.city}</h3>
-                            <span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">
-                              {item.count} listings
-                            </span>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            Avg rent {formatCurrency(item.avgRent)}
-                          </p>
+                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                    <Card className="lg:col-span-2 border-border/70 bg-card/90">
+                      <CardContent className="p-3">
+                        <div className="mb-2 flex items-center justify-between">
+                          <p className="text-sm font-medium">Map Focus: {mapFocusCity}</p>
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleFilterChange({ location: item.city })}
+                            onClick={() => handleFilterChange({ location: mapFocusCity })}
                           >
-                            Explore {item.city}
+                            Filter this city
                           </Button>
-                        </CardContent>
-                      </Card>
-                    ))}
+                        </div>
+                        <iframe
+                          title={`Map for ${mapFocusCity}`}
+                          className="h-[420px] w-full rounded-md border"
+                          loading="lazy"
+                          src={`https://www.google.com/maps?q=${encodeURIComponent(mapFocusCity + ', India')}&output=embed`}
+                        />
+                      </CardContent>
+                    </Card>
+                    <div className="space-y-3">
+                      {locationInsights.map(item => (
+                        <Card
+                          key={item.city}
+                          className={`border-border/70 bg-card/90 transition ${
+                            mapFocusCity === item.city ? 'ring-1 ring-accent' : ''
+                          }`}
+                        >
+                          <CardContent className="space-y-2 p-4">
+                            <div className="flex items-center justify-between">
+                              <h3 className="font-semibold">{item.city}</h3>
+                              <span className="rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">
+                                {item.count} listings
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              Avg rent {formatCurrency(item.avgRent)}
+                            </p>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline" onClick={() => setMapFocusCity(item.city)}>
+                                View on map
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => handleFilterChange({ location: item.city })}
+                              >
+                                Explore
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
                   </div>
                 ) : (
-                  <RoomGrid rooms={displayedRooms} />
+                  <RoomGrid
+                    rooms={displayedRooms}
+                    comparedRoomIds={comparedRoomIds}
+                    onCompareToggle={handleCompareToggle}
+                  />
                 )}
                 {totalPages > 1 && (
                   <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
@@ -330,14 +476,57 @@ export default function Home() {
                 )}
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center">
-                <h3 className="text-xl font-semibold">No Rooms Found</h3>
-                <p className="mt-2 text-muted-foreground">Try adjusting your search filters.</p>
-              </div>
+              <EmptyState
+                title="No Rooms Found"
+                description="Try adjusting your search filters."
+                actionLabel="Clear Filters"
+                onAction={() =>
+                  handleFilterChange({
+                    location: '',
+                    priceRange: [0, 50000],
+                    propertyType: [],
+                    tenantPreference: [],
+                    amenities: [],
+                    furnishingStatus: [],
+                    sortBy: 'date_desc',
+                  })
+                }
+              />
             )}
           </>
         )}
       </section>
+
+      {comparedRooms.length > 0 && (
+        <section className="rounded-xl border border-border/70 bg-card/90 p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="flex items-center gap-2 font-headline text-2xl font-semibold">
+              <GitCompareArrows className="h-5 w-5 text-accent" />
+              Compare Properties
+            </h3>
+            <Button variant="outline" size="sm" onClick={() => setComparedRoomIds([])}>
+              Clear
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {comparedRooms.map(room => (
+              <Card key={room.id} className="border-border/70">
+                <CardContent className="space-y-2 p-4">
+                  <p className="font-semibold">{room.title}</p>
+                  <p className="text-sm text-muted-foreground">{room.location}</p>
+                  <p className="text-sm">Rent: {formatCurrency(room.rent)}</p>
+                  <p className="text-sm">Type: {room.propertyType}</p>
+                  <p className="text-sm">Preference: {room.tenantPreference}</p>
+                  <p className="text-sm">Rating: {room.averageRating.toFixed(1)}</p>
+                  <Button size="sm" variant="outline" onClick={() => router.push(`/rooms/${room.id}`)}>
+                    View Details
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="space-y-4 rounded-xl border border-border/70 bg-card/90 p-5">

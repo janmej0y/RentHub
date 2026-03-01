@@ -22,6 +22,7 @@ export interface Room {
   rent: number;
   propertyType: PropertyType;
   tenantPreference: TenantPreference;
+  amenities?: string[];
   ownerContact: string;
   ownerId: string;
   images: { url: string; id: string; caption?: string }[];

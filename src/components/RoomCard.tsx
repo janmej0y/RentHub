@@ -14,9 +14,16 @@ import { useToast } from '@/hooks/use-toast';
 interface RoomCardProps {
   room: Room;
   isPriority?: boolean;
+  isCompared?: boolean;
+  onCompareToggle?: (roomId: string) => void;
 }
 
-export function RoomCard({ room, isPriority = true }: RoomCardProps) {
+export function RoomCard({
+  room,
+  isPriority = true,
+  isCompared = false,
+  onCompareToggle,
+}: RoomCardProps) {
   const { user, isAuthenticated } = useAuthContext();
   const { toast } = useToast();
   const [inWishlist, setInWishlist] = useState(false);
@@ -99,16 +106,33 @@ export function RoomCard({ room, isPriority = true }: RoomCardProps) {
               <Camera className="h-3 w-3" /> {room.images.length}
             </Badge>
           </div>
-          {isAuthenticated && !isLoading && (
-            <Button
-              size="icon"
-              variant="ghost"
-              className="absolute right-2 top-2 rounded-full bg-background/60 hover:bg-background/80"
-              onClick={handleWishlistToggle}
-            >
-              <Heart className={`h-5 w-5 text-destructive ${inWishlist ? 'fill-destructive' : 'fill-transparent'}`} />
-            </Button>
-          )}
+          <div className="absolute right-2 top-2 flex gap-2">
+            {onCompareToggle ? (
+              <Button
+                size="sm"
+                variant={isCompared ? 'default' : 'secondary'}
+                className="h-8 px-2 text-xs"
+                onClick={e => {
+                  e.preventDefault();
+                  onCompareToggle(room.id);
+                }}
+              >
+                {isCompared ? 'Compared' : 'Compare'}
+              </Button>
+            ) : null}
+            {isAuthenticated && !isLoading ? (
+              <Button
+                size="icon"
+                variant="ghost"
+                className="rounded-full bg-background/60 hover:bg-background/80"
+                onClick={handleWishlistToggle}
+              >
+                <Heart
+                  className={`h-5 w-5 text-destructive ${inWishlist ? 'fill-destructive' : 'fill-transparent'}`}
+                />
+              </Button>
+            ) : null}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-3 p-4">

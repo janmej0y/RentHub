@@ -13,7 +13,7 @@ export const FurnishingStatuses: readonly FurnishingStatus[] = [
   'Unfurnished',
 ];
 
-export type SortBy = 'rent_asc' | 'rent_desc' | 'rating_desc' | 'date_desc';
+export type SortBy = 'best_match' | 'rent_asc' | 'rent_desc' | 'rating_desc' | 'date_desc';
 
 export interface RoomFilter {
   location: string;
@@ -23,6 +23,45 @@ export interface RoomFilter {
   amenities: Amenity[];
   furnishingStatus: FurnishingStatus[];
   sortBy: SortBy;
+}
+
+type ProfilePrefs = {
+  preferredCity?: string;
+  budget?: string;
+};
+
+function readProfilePrefs(): ProfilePrefs {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = window.localStorage.getItem('renthub-profile-prefs');
+    if (!raw) return {};
+    return JSON.parse(raw) as ProfilePrefs;
+  } catch {
+    return {};
+  }
+}
+
+function getBestMatchScore(room: Room): number {
+  const prefs = readProfilePrefs();
+  let score = room.averageRating * 10;
+
+  if (prefs.preferredCity) {
+    const city = prefs.preferredCity.toLowerCase().trim();
+    if (city && room.location.toLowerCase().includes(city)) {
+      score += 25;
+    }
+  }
+
+  const budgetNum = Number(prefs.budget || 0);
+  if (budgetNum > 0) {
+    const gap = Math.abs(room.rent - budgetNum);
+    score += Math.max(0, 20 - gap / 1500);
+  }
+
+  const freshnessDays = (Date.now() - room.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+  score += Math.max(0, 10 - freshnessDays / 3);
+
+  return score;
 }
 
 export async function getRooms(filters: RoomFilter): Promise<Room[]> {
@@ -39,6 +78,7 @@ export async function getRooms(filters: RoomFilter): Promise<Room[]> {
         title,
         location,
         rent,
+        amenities,
         property_type,
         tenant_preference,
         contact_number,
@@ -85,6 +125,9 @@ export async function getRooms(filters: RoomFilter): Promise<Room[]> {
     }
 
     switch (filters.sortBy) {
+      case 'best_match':
+        query = query.order('created_at', { ascending: false });
+        break;
       case 'rent_asc':
         query = query.order('rent', { ascending: true });
         break;
@@ -105,7 +148,10 @@ export async function getRooms(filters: RoomFilter): Promise<Room[]> {
       throw error;
     }
 
-    const mappedRooms = (data || []).map(mapRoomFromDB);
+    let mappedRooms = (data || []).map(mapRoomFromDB);
+    if (filters.sortBy === 'best_match') {
+      mappedRooms = mappedRooms.sort((a, b) => getBestMatchScore(b) - getBestMatchScore(a));
+    }
     if (mappedRooms.length > 0) {
       return mappedRooms;
     }
@@ -132,6 +178,7 @@ export async function getMyRooms(userId: string): Promise<Room[]> {
         title,
         location,
         rent,
+        amenities,
         property_type,
         tenant_preference,
         contact_number,
@@ -185,6 +232,7 @@ export async function getRoomById(roomId: string): Promise<Room | null> {
         title,
         location,
         rent,
+        amenities,
         property_type,
         tenant_preference,
         contact_number,
@@ -340,6 +388,7 @@ function mapRoomFromDB(row: any): Room {
         url: img.image_url,
         caption: img.caption || '',
       })) || [],
+    amenities: Array.isArray(row.amenities) ? row.amenities : [],
     createdAt: new Date(row.created_at),
     description: row.description || '',
     approved: row.approved,
@@ -361,11 +410,23 @@ function filterAndSortMockRooms(filters: RoomFilter): Room[] {
     const matchesTenantPreference =
       filters.tenantPreference.length === 0 ||
       filters.tenantPreference.includes(room.tenantPreference);
+    const roomAmenities = room.amenities || [];
+    const matchesAmenities =
+      filters.amenities.length === 0 ||
+      filters.amenities.every(amenity => roomAmenities.includes(amenity));
 
-    return matchesLocation && matchesPrice && matchesPropertyType && matchesTenantPreference;
+    return (
+      matchesLocation &&
+      matchesPrice &&
+      matchesPropertyType &&
+      matchesTenantPreference &&
+      matchesAmenities
+    );
   });
 
   switch (filters.sortBy) {
+    case 'best_match':
+      return filtered.sort((a, b) => getBestMatchScore(b) - getBestMatchScore(a));
     case 'rent_asc':
       return filtered.sort((a, b) => a.rent - b.rent);
     case 'rent_desc':

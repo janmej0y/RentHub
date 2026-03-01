@@ -148,7 +148,11 @@ export function SearchFilters({
               Filters
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80" align="end">
+          <PopoverContent
+            className="w-80 max-h-[70vh] overflow-y-auto overscroll-contain"
+            align="end"
+            onWheel={e => e.stopPropagation()}
+          >
             <div className="space-y-6">
               <div>
                 <Label className="mb-4 flex items-center gap-2 text-sm font-medium">
@@ -314,6 +318,7 @@ export function SearchFilters({
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="best_match">Best Match</SelectItem>
             <SelectItem value="date_desc">Newest</SelectItem>
             <SelectItem value="rent_asc">Price: Low to High</SelectItem>
             <SelectItem value="rent_desc">Price: High to Low</SelectItem>

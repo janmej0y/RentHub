@@ -17,6 +17,9 @@ import { useToast } from '@/hooks/use-toast';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { uploadProfilePhoto } from '@/lib/storageService';
 import { Progress } from '@/components/ui/progress';
+import { Checkbox } from '@/components/ui/checkbox';
+
+const PROFILE_PREFS_KEY = 'renthub-profile-prefs';
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading: authLoading, updateProfile } = useAuthContext();
@@ -30,6 +33,10 @@ export default function ProfilePage() {
   const [bio, setBio] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [preferredCity, setPreferredCity] = useState('');
+  const [budget, setBudget] = useState('');
+  const [notifyBookings, setNotifyBookings] = useState(true);
+  const [notifyPriceDrop, setNotifyPriceDrop] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -46,6 +53,26 @@ export default function ProfilePage() {
     setBio(user.bio || '');
     setAvatarUrl(user.avatarUrl || '');
     setAvatarFile(null);
+    try {
+      const raw = window.localStorage.getItem(PROFILE_PREFS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as {
+          preferredCity?: string;
+          budget?: string;
+          notifyBookings?: boolean;
+          notifyPriceDrop?: boolean;
+        };
+        setPreferredCity(parsed.preferredCity || '');
+        setBudget(parsed.budget || '');
+        setNotifyBookings(parsed.notifyBookings ?? true);
+        setNotifyPriceDrop(parsed.notifyPriceDrop ?? true);
+      }
+    } catch {
+      setPreferredCity('');
+      setBudget('');
+      setNotifyBookings(true);
+      setNotifyPriceDrop(true);
+    }
   }, [user]);
 
   const userInitials = useMemo(() => {
@@ -67,6 +94,14 @@ export default function ProfilePage() {
     if (avatarUrl) score += 20;
     return score;
   }, [avatarUrl, bio, city, name, phone]);
+
+  const profileChecklist = [
+    { id: 'name', label: 'Add full name', done: Boolean(name.trim()) },
+    { id: 'phone', label: 'Add phone number', done: Boolean(phone.trim()) },
+    { id: 'city', label: 'Add city', done: Boolean(city.trim()) },
+    { id: 'bio', label: 'Write short bio', done: Boolean(bio.trim()) },
+    { id: 'avatar', label: 'Upload profile photo', done: Boolean(avatarUrl) },
+  ];
 
   const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -108,6 +143,15 @@ export default function ProfilePage() {
         avatarUrl: nextAvatarUrl,
         avatarPath: nextAvatarPath,
       });
+      window.localStorage.setItem(
+        PROFILE_PREFS_KEY,
+        JSON.stringify({
+          preferredCity: preferredCity.trim(),
+          budget: budget.trim(),
+          notifyBookings,
+          notifyPriceDrop,
+        })
+      );
       toast({
         title: 'Profile updated',
         description: 'Your profile changes have been saved.',
@@ -270,6 +314,63 @@ export default function ProfilePage() {
                 <Button type="button" variant="outline" asChild>
                   <Link href="/my-wishlist">Review Saved Homes</Link>
                 </Button>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-xl border bg-card/70 p-4">
+              <h3 className="font-medium">Profile Checklist</h3>
+              <div className="mt-3 space-y-2 text-sm">
+                {profileChecklist.map(item => (
+                  <p key={item.id} className={item.done ? 'text-foreground' : 'text-muted-foreground'}>
+                    {item.done ? '✓' : '○'} {item.label}
+                  </p>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-xl border bg-card/70 p-4">
+              <h3 className="font-medium">Recommendation Preferences</h3>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="pref-city">Preferred City</Label>
+                  <Input
+                    id="pref-city"
+                    value={preferredCity}
+                    onChange={e => setPreferredCity(e.target.value)}
+                    placeholder="e.g., Bengaluru"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="pref-budget">Monthly Budget (INR)</Label>
+                  <Input
+                    id="pref-budget"
+                    value={budget}
+                    onChange={e => setBudget(e.target.value)}
+                    placeholder="e.g., 18000"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-xl border bg-card/70 p-4">
+              <h3 className="font-medium">Notifications</h3>
+              <div className="mt-3 space-y-3 text-sm">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="notify-booking"
+                    checked={notifyBookings}
+                    onCheckedChange={checked => setNotifyBookings(Boolean(checked))}
+                  />
+                  <Label htmlFor="notify-booking">Booking status updates</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="notify-price"
+                    checked={notifyPriceDrop}
+                    onCheckedChange={checked => setNotifyPriceDrop(Boolean(checked))}
+                  />
+                  <Label htmlFor="notify-price">Price drop alerts on saved homes</Label>
+                </div>
               </div>
             </div>
           </CardContent>

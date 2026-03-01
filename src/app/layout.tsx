@@ -5,8 +5,16 @@ import { Navbar } from '@/components/Navbar';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'RentHub',
-  description: 'Find your next rental room with ease.',
+  title: {
+    default: 'RentHub',
+    template: '%s | RentHub',
+  },
+  description: 'Find verified rental rooms, compare properties, and book with confidence on RentHub.',
+  openGraph: {
+    title: 'RentHub',
+    description: 'Find verified rental rooms, compare properties, and book with confidence on RentHub.',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({
