@@ -1,117 +1,125 @@
-# RentHub
+# 🏠 RentHub
 
-RentHub is a rental listing platform built with Next.js (App Router), TypeScript, Tailwind CSS, and Supabase-ready services.
+<p>
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-15-black?logo=next.js">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript&logoColor=white">
+  <img alt="React" src="https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white">
+  <img alt="Tailwind" src="https://img.shields.io/badge/TailwindCSS-3.4-06B6D4?logo=tailwindcss&logoColor=white">
+  <img alt="Supabase" src="https://img.shields.io/badge/Supabase-Integrated-3ECF8E?logo=supabase&logoColor=white">
+</p>
 
-The project currently supports a strong mock-first flow (useful when backend/network is unstable) while keeping Supabase integration points in place.
+> ✨ **RentHub** is a modern rental listing platform to browse, compare, chat, and book properties with a polished UX.
 
-## Highlights
+<p>
+  <span style="background:#ecfeff; padding:6px 10px; border-radius:6px;">
+    <strong>Highlight:</strong> Works in mock-first mode too, so development continues even when backend/network is unstable.
+  </span>
+</p>
 
-- Auth (mock login + Supabase auth wiring)
-- Room discovery with advanced filters and sorting
-- Pagination (10 results per page)
-- List and map-style discovery mode
-- Room details with:
-  - full description
-  - highlights
-  - image gallery + fullscreen preview
-  - reviews and review sorting
-  - chat with owner (mock/local)
-- Booking flow with:
-  - multi-step booking UX
-  - exact checkout date-time input
-  - UPI + QR payment section
-  - screenshot upload requirement
-  - pending confirmation messaging
-- My Bookings:
-  - timeline/status
-  - color receipt generation
-  - receipt archive
-- Profile:
-  - profile photo upload
-  - completion score
-  - preference settings
-- Wishlist, recently viewed, saved searches, compare properties
+## 🚀 Key Features
 
-## Tech Stack
+### 🔐 Authentication
+- Mock login flow (fast local testing)
+- Supabase auth integration points
+- Session-based protected routes
 
-- Framework: Next.js 15 (App Router, Turbopack)
-- Language: TypeScript
-- Styling: Tailwind CSS
-- UI: shadcn/ui + Radix UI
-- Backend (integrated): Supabase (Auth, Postgres, Storage)
-- Runtime: React 19
+### 🔎 Discovery & Search
+- Advanced filters (location, price, type, tenant preference, amenities, furnishing)
+- Sort options including **Best Match**
+- List view + map-style exploration
+- Pagination (10 results/page)
+- Saved searches + recently viewed + compare properties
 
-## Project Structure
+### 🏘️ Property Details
+- Gallery carousel + fullscreen image preview
+- Full description + highlights + amenities chips
+- Reviews with sorting + helpful votes
+- In-app chat with owner (mock/local)
+
+### 📅 Booking Experience
+- Multi-step booking flow
+- Exact checkout date-time selection
+- UPI + QR + screenshot upload
+- Agreement consent before submit
+- Availability preview + charge breakdown
+
+### 🧾 Receipts & Profile
+- Color, branded printable receipts
+- Receipt archive
+- Profile photo upload
+- Profile completion meter
+- Preference and notification settings
+
+## 🛠️ Tech Stack
+
+- **Framework:** Next.js 15 (App Router, Turbopack)
+- **Language:** TypeScript
+- **UI:** shadcn/ui + Radix UI + Lucide icons
+- **Styling:** Tailwind CSS
+- **Backend Integration:** Supabase (Auth / DB / Storage ready)
+- **Runtime:** React 19
+
+## 📁 Project Structure
 
 ```text
 src/
-  app/                App Router pages and route-level UI states
-  components/         Shared UI and feature components
-  context/            Auth context
-  hooks/              Reusable hooks
-  lib/                Services (rooms, booking, wishlist, chat, storage, supabase)
+  app/                Next.js routes, page layouts, loading/error boundaries
+  components/         Reusable UI + feature components
+  context/            Global auth/provider state
+  hooks/              Shared hooks
+  lib/                Services (rooms, booking, chat, receipt, storage, supabase)
   types/              Type definitions
 ```
 
-## Getting Started
+## ⚙️ Quick Start
 
-1. Install dependencies
-
+### 1) Install
 ```bash
 npm install
 ```
 
-2. Configure environment
-
-Create `.env.local`:
-
+### 2) Configure `.env.local`
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_PUBLIC_ANON_KEY
 ```
 
-3. Run development server
-
+### 3) Run
 ```bash
 npm run dev
 ```
 
-Open: `http://localhost:9002`
+Open: **`http://localhost:9002`**
 
-## Scripts
+## 📜 Available Scripts
 
-- `npm run dev` - start local dev server on port 9002
-- `npm run build` - production build
-- `npm run start` - start production server
-- `npm run lint` - lint check
-- `npm run typecheck` - TypeScript check
+- `npm run dev` → Start dev server on port `9002`
+- `npm run build` → Production build
+- `npm run start` → Start production server
+- `npm run lint` → Lint checks
+- `npm run typecheck` → TypeScript checks
 
-## Current Behavior Notes
+## 🧠 Current Notes
 
-- The app gracefully falls back to local/mock behavior in multiple places when Supabase/network fails.
-- Chat is currently mock/local storage based.
-- Receipt archive is currently local storage based.
-- Booking confirmation currently supports mock pending flow if backend is unavailable.
+- ✅ App supports mock/local fallbacks in multiple flows.
+- ✅ Chat and receipt archive are currently local-storage backed.
+- ✅ Booking can continue with mock pending confirmation when backend fails.
 
-## Known Issues
-
-TypeScript currently has pre-existing errors in:
+## ⚠️ Known TypeScript Issues (Pre-existing)
 
 - `src/components/AddRoomForm.tsx`
 - `src/components/ui/calendar.tsx`
 
-These are not caused by the latest feature updates and can be fixed in a dedicated cleanup pass.
+These are existing issues and can be fixed in a dedicated cleanup pass.
 
-## Roadmap (Suggested)
+## 🗺️ Suggested Next Upgrades
 
-- Fix current TS errors and enforce clean CI typecheck
-- Real-time chat threads and unread badges
-- Stronger booking lifecycle (reschedule/cancel/dispute)
-- Better map and geo filters
-- Admin moderation and analytics expansion
+1. Real-time chat threads + unread indicators
+2. Booking reschedule/cancel lifecycle
+3. Full TS cleanup and CI typecheck gate
+4. Analytics and monitoring (funnel + errors)
 
-## Author
+## 👨‍💻 Author
 
-Janmejoy Mahato  
-Full-Stack Developer (Next.js, TypeScript, Supabase)
-
+**Janmejoy Mahato**  
+Full-Stack Developer • Next.js • TypeScript • Supabase
