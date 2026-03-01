@@ -1,5 +1,5 @@
 import { mockRooms } from '@/lib/mockRooms';
-import { isMockModeEnabled } from '@/lib/mockMode';
+import { isMockId, isMockModeEnabled } from '@/lib/mockMode';
 import { supabase } from '@/lib/supabaseClient';
 import type { Room } from '@/types/room';
 
@@ -36,7 +36,7 @@ function setLocalWishlistIds(userId: string, ids: string[]): void {
 }
 
 function shouldUseLocalWishlist(userId: string, roomId?: string): boolean {
-  return isMockModeEnabled();
+  return isMockModeEnabled() || isMockId(userId) || isMockId(roomId);
 }
 
 export async function getWishlist(userId: string): Promise<Room[]> {

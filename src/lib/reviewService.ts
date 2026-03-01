@@ -1,4 +1,4 @@
-import { isMockModeEnabled } from '@/lib/mockMode';
+import { isMockId, isMockModeEnabled } from '@/lib/mockMode';
 import { supabase } from '@/lib/supabaseClient';
 import type { Review } from '@/types/room';
 
@@ -31,7 +31,7 @@ function writeStoredReviews(reviews: StoredReview[]): void {
 }
 
 function shouldUseLocalReview(roomId: string): boolean {
-  return isMockModeEnabled();
+  return isMockModeEnabled() || isMockId(roomId);
 }
 
 export async function getReviews(roomId: string): Promise<Review[]> {

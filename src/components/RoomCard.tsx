@@ -67,6 +67,9 @@ export function RoomCard({ room, isPriority = true }: RoomCardProps) {
 
   const placeholder = PlaceHolderImages.find(p => p.id === 'room-1');
   const imageUrl = room.images?.[0]?.url || placeholder?.imageUrl || 'https://picsum.photos/600/400';
+  const cardImageUrl = imageUrl.includes('images.unsplash.com')
+    ? imageUrl.replace(/w=\d+/i, 'w=640').replace(/q=\d+/i, 'q=55')
+    : imageUrl;
   const imageCaption = room.images?.[0]?.caption || 'Click to see full property details and all photos.';
   const shortDescription = room.description?.slice(0, 110) || 'Well-maintained property with practical layout.';
   const isRecent = Date.now() - room.createdAt.getTime() < 1000 * 60 * 60 * 24 * 3;
@@ -76,12 +79,12 @@ export function RoomCard({ room, isPriority = true }: RoomCardProps) {
       <CardHeader className="p-0">
         <div className="relative aspect-video w-full overflow-hidden bg-muted">
           <Image
-            src={imageUrl}
+            src={cardImageUrl}
             alt={room.title}
             width={600}
             height={400}
             priority={isPriority}
-            unoptimized
+            quality={60}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />

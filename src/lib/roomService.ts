@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabaseClient';
 import { mockRooms } from '@/lib/mockRooms';
-import { isMockModeEnabled } from '@/lib/mockMode';
+import { isMockId, isMockModeEnabled } from '@/lib/mockMode';
 import type { PropertyType, Room, TenantPreference } from '@/types/room';
 
 export type Amenity = 'WiFi' | 'AC' | 'Parking' | 'Kitchen';
@@ -117,7 +117,7 @@ export async function getRooms(filters: RoomFilter): Promise<Room[]> {
 }
 
 export async function getMyRooms(userId: string): Promise<Room[]> {
-  if (isMockModeEnabled()) {
+  if (isMockModeEnabled() || isMockId(userId)) {
     return mockRooms
       .filter(room => room.ownerId === userId)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -172,7 +172,7 @@ export async function getMyRooms(userId: string): Promise<Room[]> {
 }
 
 export async function getRoomById(roomId: string): Promise<Room | null> {
-  if (isMockModeEnabled()) {
+  if (isMockModeEnabled() || isMockId(roomId)) {
     return mockRooms.find(room => room.id === roomId) || null;
   }
 

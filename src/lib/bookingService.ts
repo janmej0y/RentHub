@@ -1,4 +1,4 @@
-import { isMockModeEnabled } from '@/lib/mockMode';
+import { isMockId, isMockModeEnabled } from '@/lib/mockMode';
 import { mockRooms } from '@/lib/mockRooms';
 import { getPaymentScreenshotSignedUrl } from '@/lib/storageService';
 import { supabase } from '@/lib/supabaseClient';
@@ -34,7 +34,7 @@ function writeStoredBookings(bookings: StoredBooking[]): void {
 }
 
 function shouldUseLocalBooking(userId: string, roomId?: string): boolean {
-  return isMockModeEnabled();
+  return isMockModeEnabled() || isMockId(userId) || isMockId(roomId);
 }
 
 export async function getBookings(userId: string): Promise<Booking[]> {

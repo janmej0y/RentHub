@@ -210,15 +210,22 @@ export default function RoomDetailPage() {
                 <CarouselItem key={image.id}>
                   <div className="space-y-3">
                     <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
+                      {(() => {
+                        const detailImageUrl = image.url.includes('images.unsplash.com')
+                          ? image.url.replace(/w=\d+/i, 'w=1000').replace(/q=\d+/i, 'q=65')
+                          : image.url;
+                        return (
                       <Image
-                        src={image.url}
+                        src={detailImageUrl}
                         alt={image.caption || room.title}
                         fill
                         priority={index === 0}
-                        unoptimized
+                        quality={70}
                         className="object-cover"
                         sizes="(max-width: 768px) 100vw, 60vw"
                       />
+                        );
+                      })()}
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {image.caption || 'Property image'}

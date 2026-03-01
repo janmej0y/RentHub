@@ -83,7 +83,9 @@ export default function Home() {
 
   return (
     <div className="container mx-auto space-y-8 px-4 py-8">
-      <header className="rounded-2xl border bg-gradient-to-r from-slate-50 via-white to-orange-50 p-8">
+      <header className="fade-in-up relative overflow-hidden rounded-2xl border bg-gradient-to-r from-sky-50 via-white to-emerald-50 p-8 shadow-sm">
+        <div className="float-soft absolute -right-10 -top-10 h-40 w-40 rounded-full bg-sky-400/15 blur-2xl" />
+        <div className="float-soft absolute -bottom-10 left-1/3 h-36 w-36 rounded-full bg-emerald-400/15 blur-2xl" />
         <h1 className="font-headline text-4xl font-bold md:text-6xl">Find Your Perfect Room</h1>
         <p className="mt-4 text-lg text-muted-foreground">
           Faster browsing, smarter filters, and rich property details.
@@ -103,20 +105,20 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border bg-card p-4">
+      <section className="fade-in grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="glass-panel rounded-xl p-4 shadow-sm">
           <p className="text-xs uppercase text-muted-foreground">Available Listings</p>
           <p className="mt-2 flex items-center gap-2 text-2xl font-semibold">
             <Building2 className="h-5 w-5 text-accent" /> {stats.count}
           </p>
         </div>
-        <div className="rounded-xl border bg-card p-4">
+        <div className="glass-panel rounded-xl p-4 shadow-sm">
           <p className="text-xs uppercase text-muted-foreground">Average Monthly Rent</p>
           <p className="mt-2 flex items-center gap-2 text-2xl font-semibold">
             <WalletCards className="h-5 w-5 text-accent" /> {formatCurrency(stats.avgRent)}
           </p>
         </div>
-        <div className="rounded-xl border bg-card p-4">
+        <div className="glass-panel rounded-xl p-4 shadow-sm">
           <p className="text-xs uppercase text-muted-foreground">Most Listings In</p>
           <p className="mt-2 flex items-center gap-2 text-2xl font-semibold">
             <TrendingUp className="h-5 w-5 text-accent" /> {stats.topCity}
@@ -124,7 +126,7 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="sticky top-0 z-10 bg-background/90 py-4 backdrop-blur-sm">
+      <div className="sticky top-0 z-10 py-4">
         <SearchFilters onFilterChange={handleFilterChange} initialFilters={filters} />
       </div>
 
