@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 import { useAuthContext } from '@/context/AuthContext';
 import { getBookings } from '@/lib/bookingService';
 import type { Booking } from '@/types/booking';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 
@@ -88,6 +90,30 @@ export default function MyBookingsPage() {
               <CardContent>
                 <p>Check-in: {new Date(booking.checkIn).toLocaleDateString()}</p>
                 <p>Check-out: {new Date(booking.checkOut).toLocaleDateString()}</p>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Status:</span>
+                  <Badge variant={booking.status === 'pending' ? 'secondary' : 'default'}>
+                    {booking.status === 'pending' ? 'Pending Review' : 'Confirmed'}
+                  </Badge>
+                </div>
+                {booking.paymentScreenshotName ? (
+                  <div className="mt-3">
+                    <p className="text-xs text-muted-foreground">
+                      Payment screenshot: {booking.paymentScreenshotName}
+                    </p>
+                    {booking.paymentScreenshotUrl ? (
+                      <div className="relative mt-2 h-36 w-56 overflow-hidden rounded-md border">
+                        <Image
+                          src={booking.paymentScreenshotUrl}
+                          alt={booking.paymentScreenshotName}
+                          fill
+                          unoptimized
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
           ))}

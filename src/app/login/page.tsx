@@ -11,9 +11,10 @@ import { useEffect, useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 
 export default function LoginPage() {
-  const { login, isAuthenticated, isLoading } = useAuthContext();
+  const { login, loginWithGoogle, isAuthenticated, isLoading } = useAuthContext();
   const router = useRouter();
   const [isAdminLogin, setIsAdminLogin] = useState(true);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -27,6 +28,15 @@ export default function LoginPage() {
     const email = isAdminLogin ? 'admin@example.com' : 'user@example.com';
     const password = 'password'; // Replace with actual password logic
     login(email, password);
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setIsGoogleLoading(true);
+      await loginWithGoogle();
+    } finally {
+      setIsGoogleLoading(false);
+    }
   };
 
   if (isLoading || isAuthenticated) {
@@ -64,6 +74,17 @@ export default function LoginPage() {
               <div>
                 <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
                   Sign in
+                </Button>
+              </div>
+              <div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleGoogleLogin}
+                  disabled={isGoogleLoading}
+                >
+                  {isGoogleLoading ? 'Redirecting...' : 'Continue with Google'}
                 </Button>
               </div>
             </form>

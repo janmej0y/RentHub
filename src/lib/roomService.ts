@@ -1,5 +1,7 @@
 import { supabase } from '@/lib/supabaseClient';
-import type { Room, PropertyType, TenantPreference } from '@/types/room';
+import { mockRooms } from '@/lib/mockRooms';
+import { isMockModeEnabled } from '@/lib/mockMode';
+import type { PropertyType, Room, TenantPreference } from '@/types/room';
 
 export type Amenity = 'WiFi' | 'AC' | 'Parking' | 'Kitchen';
 export const Amenities: readonly Amenity[] = ['WiFi', 'AC', 'Parking', 'Kitchen'];
@@ -13,9 +15,6 @@ export const FurnishingStatuses: readonly FurnishingStatus[] = [
 
 export type SortBy = 'rent_asc' | 'rent_desc' | 'rating_desc' | 'date_desc';
 
-/**
- * Filters used by search
- */
 export interface RoomFilter {
   location: string;
   priceRange: [number, number];
@@ -26,178 +25,202 @@ export interface RoomFilter {
   sortBy: SortBy;
 }
 
-/**
- * Fetch rooms with filters (PUBLIC)
- */
 export async function getRooms(filters: RoomFilter): Promise<Room[]> {
-  let query = supabase
-    .from('rooms')
-    .select(
+  if (isMockModeEnabled()) {
+    return filterAndSortMockRooms(filters);
+  }
+
+  try {
+    let query = supabase
+      .from('rooms')
+      .select(
+        `
+        id,
+        title,
+        location,
+        rent,
+        property_type,
+        tenant_preference,
+        contact_number,
+        owner_id,
+        description,
+        created_at,
+        approved,
+        room_images (
+          id,
+          image_url
+        ),
+        reviews (
+          id,
+          rating,
+          comment,
+          created_at
+        )
       `
-      id,
-      title,
-      location,
-      rent,
-      property_type,
-      tenant_preference,
-      contact_number,
-      owner_id,
-      created_at,
-      room_images (
-        id,
-        image_url
-      ),
-      reviews (
-        id,
-        rating,
-        comment,
-        created_at
       )
-    `
-    )
-    .order('created_at', { ascending: false });
+      .eq('approved', true);
 
-  // ✅ Approved filter
-  query = query.eq('approved', true);
+    if (filters.location.trim()) {
+      query = query.ilike('location', `%${filters.location.trim()}%`);
+    }
 
-  // 🔎 Location filter
-  if (filters.location.trim()) {
-    query = query.ilike('location', `%${filters.location.trim()}%`);
+    query = query
+      .gte('rent', filters.priceRange[0])
+      .lte('rent', filters.priceRange[1]);
+
+    if (filters.propertyType.length > 0) {
+      query = query.in('property_type', filters.propertyType);
+    }
+
+    if (filters.tenantPreference.length > 0) {
+      query = query.in('tenant_preference', filters.tenantPreference);
+    }
+
+    if (filters.furnishingStatus.length > 0) {
+      query = query.in('furnishing_status', filters.furnishingStatus);
+    }
+
+    if (filters.amenities.length > 0) {
+      query = query.contains('amenities', filters.amenities);
+    }
+
+    switch (filters.sortBy) {
+      case 'rent_asc':
+        query = query.order('rent', { ascending: true });
+        break;
+      case 'rent_desc':
+        query = query.order('rent', { ascending: false });
+        break;
+      case 'rating_desc':
+        query = query.order('created_at', { ascending: false });
+        break;
+      case 'date_desc':
+      default:
+        query = query.order('created_at', { ascending: false });
+        break;
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      throw error;
+    }
+
+    const mappedRooms = (data || []).map(mapRoomFromDB);
+    if (mappedRooms.length > 0) {
+      return mappedRooms;
+    }
+  } catch {
+    // Use local mock data if Supabase is unavailable or empty.
   }
 
-  // 💰 Price range filter
-  query = query
-    .gte('rent', filters.priceRange[0])
-    .lte('rent', filters.priceRange[1]);
-
-  // 🏠 Property type filter
-  if (filters.propertyType.length > 0) {
-    query = query.in('property_type', filters.propertyType);
-  }
-
-  // 👥 Tenant preference filter
-  if (filters.tenantPreference.length > 0) {
-    query = query.in('tenant_preference', filters.tenantPreference);
-  }
-  // 🛋️ Furnishing status filter
-  if (filters.furnishingStatus.length > 0) {
-    query = query.in('furnishing_status', filters.furnishingStatus);
-  }
-
-  // ✨ Amenities filter
-  if (filters.amenities.length > 0) {
-    query = query.contains('amenities', filters.amenities);
-  }
-
-  // 📊 Sort by
-  switch (filters.sortBy) {
-    case 'rent_asc':
-      query = query.order('rent', { ascending: true });
-      break;
-    case 'rent_desc':
-      query = query.order('rent', { ascending: false });
-      break;
-    case 'rating_desc':
-      // This requires a more complex query to sort by average rating,
-      // which is not directly supported by Supabase's postgREST API.
-      // For now, we'll sort by creation date as a fallback.
-      query = query.order('created_at', { ascending: false });
-      break;
-    case 'date_desc':
-    default:
-      query = query.order('created_at', { ascending: false });
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return data.map(mapRoomFromDB);
+  return filterAndSortMockRooms(filters);
 }
 
-/**
- * Fetch rooms created by logged-in owner
- */
 export async function getMyRooms(userId: string): Promise<Room[]> {
-  const { data, error } = await supabase
-    .from('rooms')
-    .select(
-      `
-      id,
-      title,
-      location,
-      rent,
-      property_type,
-      tenant_preference,
-      contact_number,
-      owner_id,
-      created_at,
-      room_images (
-        id,
-        image_url
-      ),
-      reviews (
-        id,
-        rating,
-        comment,
-        created_at
-      )
-    `
-    )
-    .eq('owner_id', userId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new Error(error.message);
+  if (isMockModeEnabled()) {
+    return mockRooms
+      .filter(room => room.ownerId === userId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
-  return data.map(mapRoomFromDB);
+  try {
+    const { data, error } = await supabase
+      .from('rooms')
+      .select(
+        `
+        id,
+        title,
+        location,
+        rent,
+        property_type,
+        tenant_preference,
+        contact_number,
+        owner_id,
+        description,
+        created_at,
+        approved,
+        room_images (
+          id,
+          image_url
+        ),
+        reviews (
+          id,
+          rating,
+          comment,
+          created_at
+        )
+      `
+      )
+      .eq('owner_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    const mappedRooms = (data || []).map(mapRoomFromDB);
+    if (mappedRooms.length > 0) {
+      return mappedRooms;
+    }
+  } catch {
+    // Use local mock data if Supabase is unavailable.
+  }
+
+  return mockRooms
+    .filter(room => room.ownerId === userId)
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 }
 
-/**
- * Fetch single room by ID
- */
 export async function getRoomById(roomId: string): Promise<Room | null> {
-  const { data, error } = await supabase
-    .from('rooms')
-    .select(
-      `
-      id,
-      title,
-      location,
-      rent,
-      property_type,
-      tenant_preference,
-      contact_number,
-      owner_id,
-      created_at,
-      room_images (
-        id,
-        image_url
-      ),
-      reviews (
-        id,
-        rating,
-        comment,
-        created_at
-      )
-    `
-    )
-    .eq('id', roomId)
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
+  if (isMockModeEnabled()) {
+    return mockRooms.find(room => room.id === roomId) || null;
   }
 
-  return mapRoomFromDB(data);
+  try {
+    const { data, error } = await supabase
+      .from('rooms')
+      .select(
+        `
+        id,
+        title,
+        location,
+        rent,
+        property_type,
+        tenant_preference,
+        contact_number,
+        owner_id,
+        description,
+        created_at,
+        approved,
+        room_images (
+          id,
+          image_url
+        ),
+        reviews (
+          id,
+          rating,
+          comment,
+          created_at
+        )
+      `
+      )
+      .eq('id', roomId)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    if (data) {
+      return mapRoomFromDB(data);
+    }
+  } catch {
+    // Ignore and use mock fallback below.
+  }
+
+  return mockRooms.find(room => room.id === roomId) || null;
 }
 
-/**
- * Create new room
- */
 export async function addRoom(input: {
   title: string;
   location: string;
@@ -215,7 +238,6 @@ export async function addRoom(input: {
     throw new Error('Not authenticated');
   }
 
-  // 1️⃣ Insert room
   const { data: room, error } = await supabase
     .from('rooms')
     .insert({
@@ -234,17 +256,13 @@ export async function addRoom(input: {
     throw new Error(error.message);
   }
 
-  // 2️⃣ Insert images
   if (input.imageUrls.length > 0) {
     const imageRows = input.imageUrls.map(url => ({
       room_id: room.id,
       image_url: url,
     }));
 
-    const { error: imageError } = await supabase
-      .from('room_images')
-      .insert(imageRows);
-
+    const { error: imageError } = await supabase.from('room_images').insert(imageRows);
     if (imageError) {
       throw new Error(imageError.message);
     }
@@ -253,9 +271,6 @@ export async function addRoom(input: {
   return getRoomById(room.id) as Promise<Room>;
 }
 
-/**
- * Update room
- */
 export async function updateRoom(
   roomId: string,
   updates: Partial<{
@@ -286,26 +301,19 @@ export async function updateRoom(
   return getRoomById(roomId) as Promise<Room>;
 }
 
-/**
- * Delete room
- */
 export async function deleteRoom(roomId: string): Promise<void> {
   const { error } = await supabase.from('rooms').delete().eq('id', roomId);
-
   if (error) {
     throw new Error(error.message);
   }
 }
 
-/**
- * Map DB → App Room type
- */
 function mapRoomFromDB(row: any): Room {
   const reviews =
     row.reviews?.map((review: any) => ({
       id: review.id,
-      userId: review.profiles.id,
-      userName: review.profiles.full_name,
+      userId: review.profiles?.id || 'unknown',
+      userName: review.profiles?.full_name || 'Anonymous',
       rating: review.rating,
       comment: review.comment,
       createdAt: new Date(review.created_at),
@@ -313,7 +321,7 @@ function mapRoomFromDB(row: any): Room {
 
   const averageRating =
     reviews.length > 0
-      ? reviews.reduce((acc: any, review: any) => acc + review.rating, 0) /
+      ? reviews.reduce((acc: number, review: { rating: number }) => acc + review.rating, 0) /
         reviews.length
       : 0;
 
@@ -326,14 +334,46 @@ function mapRoomFromDB(row: any): Room {
     tenantPreference: row.tenant_preference,
     ownerContact: row.contact_number,
     ownerId: row.owner_id,
-    createdAt: new Date(row.created_at),
-    approved: row.approved,
     images:
       row.room_images?.map((img: any) => ({
         id: img.id,
         url: img.image_url,
+        caption: img.caption || '',
       })) || [],
+    createdAt: new Date(row.created_at),
+    description: row.description || '',
+    approved: row.approved,
     reviews,
     averageRating,
   };
+}
+
+function filterAndSortMockRooms(filters: RoomFilter): Room[] {
+  const locationQuery = filters.location.trim().toLowerCase();
+
+  const filtered = mockRooms.filter(room => {
+    const matchesLocation =
+      locationQuery.length === 0 || room.location.toLowerCase().includes(locationQuery);
+    const matchesPrice =
+      room.rent >= filters.priceRange[0] && room.rent <= filters.priceRange[1];
+    const matchesPropertyType =
+      filters.propertyType.length === 0 || filters.propertyType.includes(room.propertyType);
+    const matchesTenantPreference =
+      filters.tenantPreference.length === 0 ||
+      filters.tenantPreference.includes(room.tenantPreference);
+
+    return matchesLocation && matchesPrice && matchesPropertyType && matchesTenantPreference;
+  });
+
+  switch (filters.sortBy) {
+    case 'rent_asc':
+      return filtered.sort((a, b) => a.rent - b.rent);
+    case 'rent_desc':
+      return filtered.sort((a, b) => b.rent - a.rent);
+    case 'rating_desc':
+      return filtered.sort((a, b) => b.averageRating - a.averageRating);
+    case 'date_desc':
+    default:
+      return filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
 }

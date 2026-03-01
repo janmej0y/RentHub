@@ -15,6 +15,7 @@ import { useAuthContext } from '@/context/AuthContext';
 import { LogOut, User as UserIcon } from 'lucide-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Skeleton } from '../ui/skeleton';
+import Link from 'next/link';
 
 export function UserNav() {
   const { user, logout, isLoading } = useAuthContext();
@@ -26,7 +27,7 @@ export function UserNav() {
   
   if (!user) return null;
   
-  const userInitials = user.name
+  const userInitials = (user.name || 'User')
     .split(' ')
     .map(n => n[0])
     .join('')
@@ -57,9 +58,11 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/profile">
             <UserIcon className="mr-2 h-4 w-4" />
             <span>Profile</span>
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

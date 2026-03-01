@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { getRoomById, updateRoom } from '@/lib/roomService';
 import type { Room } from '@/types/room';
 import { useAuthContext } from '@/context/AuthContext';
@@ -11,7 +11,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
-export default function EditRoomPage({ params }: { params: { id: string } }) {
+export default function EditRoomPage() {
+  const params = useParams<{ id: string }>();
+  const roomId = typeof params.id === 'string' ? params.id : '';
   const { user, isAuthenticated, isLoading: authLoading } = useAuthContext();
   const router = useRouter();
   const { toast } = useToast();
@@ -30,7 +32,7 @@ export default function EditRoomPage({ params }: { params: { id: string } }) {
     const fetchRoom = async () => {
       try {
         setIsLoading(true);
-        const data = await getRoomById(params.id);
+        const data = await getRoomById(roomId);
         if (!data || data.ownerId !== user?.id) {
           toast({
             variant: 'destructive',
@@ -52,10 +54,10 @@ export default function EditRoomPage({ params }: { params: { id: string } }) {
       }
     };
 
-    if (user) {
+    if (user && roomId) {
       fetchRoom();
     }
-  }, [params.id, user, router, toast]);
+  }, [roomId, user, router, toast]);
 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

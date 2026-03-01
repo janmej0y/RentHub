@@ -24,7 +24,7 @@ export interface Room {
   tenantPreference: TenantPreference;
   ownerContact: string;
   ownerId: string;
-  images: { url: string; id: string }[];
+  images: { url: string; id: string; caption?: string }[];
   createdAt: Date;
   description?: string;
   approved?: boolean;

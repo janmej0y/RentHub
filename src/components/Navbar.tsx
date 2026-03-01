@@ -8,7 +8,7 @@ import { Home } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 
 export function Navbar() {
-  const { user, isAuthenticated, isLoading, logout } = useAuthContext();
+  const { user, isAuthenticated, isLoading } = useAuthContext();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -67,6 +67,12 @@ export function Navbar() {
                 >
                   Dashboard
                 </Link>
+                <Link
+                  href="/admin/booking-requests"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Booking Requests
+                </Link>
               </>
             )}
           </nav>
@@ -78,7 +84,15 @@ export function Navbar() {
               <Skeleton className="h-8 w-20" />
             </div>
           ) : isAuthenticated ? (
-            <UserNav />
+            <>
+              <Button variant="ghost" asChild className="hidden sm:inline-flex">
+                <Link href="/my-wishlist">My Wishlist</Link>
+              </Button>
+              <Button variant="ghost" asChild className="hidden sm:inline-flex">
+                <Link href="/my-bookings">My Bookings</Link>
+              </Button>
+              <UserNav />
+            </>
           ) : (
             <>
               <Button variant="ghost" asChild>
