@@ -1,104 +1,117 @@
-# 🏠 RentHub
+# RentHub
 
-RentHub is a full-stack rental listing platform that helps users **find, list, and manage rental rooms** easily.  
-It is built with **Next.js (App Router)** and **Supabase** for authentication, database, and storage.
+RentHub is a rental listing platform built with Next.js (App Router), TypeScript, Tailwind CSS, and Supabase-ready services.
 
----
+The project currently supports a strong mock-first flow (useful when backend/network is unstable) while keeping Supabase integration points in place.
 
-## 🚀 Features
+## Highlights
 
-### 👤 Authentication
-- Email & password sign up / login
-- Supabase Auth integration
-- Session persistence
-- Secure client-side auth using public anon key
+- Auth (mock login + Supabase auth wiring)
+- Room discovery with advanced filters and sorting
+- Pagination (10 results per page)
+- List and map-style discovery mode
+- Room details with:
+  - full description
+  - highlights
+  - image gallery + fullscreen preview
+  - reviews and review sorting
+  - chat with owner (mock/local)
+- Booking flow with:
+  - multi-step booking UX
+  - exact checkout date-time input
+  - UPI + QR payment section
+  - screenshot upload requirement
+  - pending confirmation messaging
+- My Bookings:
+  - timeline/status
+  - color receipt generation
+  - receipt archive
+- Profile:
+  - profile photo upload
+  - completion score
+  - preference settings
+- Wishlist, recently viewed, saved searches, compare properties
 
-### 🏘️ Room Listings
-- Browse available rooms
-- Filter by:
-  - Location
-  - Rent range
-  - Property type
-  - Tenant preference
-- View room images and details
+## Tech Stack
 
-### 🧑‍💼 Owner Features
-- Add new room listings
-- Upload multiple room images
-- View rooms posted by the logged-in user
-- Edit & delete listings
+- Framework: Next.js 15 (App Router, Turbopack)
+- Language: TypeScript
+- Styling: Tailwind CSS
+- UI: shadcn/ui + Radix UI
+- Backend (integrated): Supabase (Auth, Postgres, Storage)
+- Runtime: React 19
 
-### ⚡ UX & Performance
-- Skeleton loaders
-- Client-side caching
-- Responsive UI
-- Optimized Supabase queries
-
----
-
-## 🛠️ Tech Stack
-
-| Layer        | Technology |
-|-------------|------------|
-| Frontend     | Next.js 15 (App Router) |
-| Language     | TypeScript |
-| Styling      | Tailwind CSS |
-| UI Components| shadcn/ui |
-| Backend      | Supabase |
-| Auth         | Supabase Auth |
-| Database     | PostgreSQL (Supabase) |
-| Storage      | Supabase Storage |
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```text
 src/
-├── app/          # App Router pages
-├── components/   # Reusable UI components
-├── context/      # Global auth state
-├── hooks/        # Custom hooks
-├── lib/          # Supabase client & services
-├── types/        # Type definitions
-└── styles/       # Global styles
----
-🔑 Environment Variables
-Create a .env.local file:
+  app/                App Router pages and route-level UI states
+  components/         Shared UI and feature components
+  context/            Auth context
+  hooks/              Reusable hooks
+  lib/                Services (rooms, booking, wishlist, chat, storage, supabase)
+  types/              Type definitions
+```
+
+## Getting Started
+
+1. Install dependencies
+
+```bash
+npm install
+```
+
+2. Configure environment
+
+Create `.env.local`:
+
+```env
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_PUBLIC_ANON_KEY
----
+```
 
----
+3. Run development server
 
-⚙️ Setup
-
-git clone [https://github.com/your-username/renthub.git](https://github.com/your-username/renthub.git)
-cd renthub
-npm install
+```bash
 npm run dev
+```
 
----
+Open: `http://localhost:9002`
 
+## Scripts
 
----
+- `npm run dev` - start local dev server on port 9002
+- `npm run build` - production build
+- `npm run start` - start production server
+- `npm run lint` - lint check
+- `npm run typecheck` - TypeScript check
 
-Open: 👉 http://localhost:9002
+## Current Behavior Notes
 
-🎯 What This Project Demonstrates
-Full-stack architecture with real backend integration
+- The app gracefully falls back to local/mock behavior in multiple places when Supabase/network fails.
+- Chat is currently mock/local storage based.
+- Receipt archive is currently local storage based.
+- Booking confirmation currently supports mock pending flow if backend is unavailable.
 
-Secure authentication & protected routes
+## Known Issues
 
-Clean, scalable folder structure
+TypeScript currently has pre-existing errors in:
 
-Practical use of Supabase with Next.js
+- `src/components/AddRoomForm.tsx`
+- `src/components/ui/calendar.tsx`
 
-Production-ready UI & UX patterns
+These are not caused by the latest feature updates and can be fixed in a dedicated cleanup pass.
 
-👨‍💻 Author
-Janmejoy Mahato Full-Stack Developer | Next.js | Supabase | TypeScript
+## Roadmap (Suggested)
 
-⭐ This project was built as a real-world full-stack application, focusing on scalability, security, and clean architecture.
+- Fix current TS errors and enforce clean CI typecheck
+- Real-time chat threads and unread badges
+- Stronger booking lifecycle (reschedule/cancel/dispute)
+- Better map and geo filters
+- Admin moderation and analytics expansion
 
----
+## Author
+
+Janmejoy Mahato  
+Full-Stack Developer (Next.js, TypeScript, Supabase)
+
